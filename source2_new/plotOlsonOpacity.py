@@ -9,7 +9,7 @@ import time
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 30;
+t0 = 3;
 def SuOlsonMyNumericSolution(fname):
     k = 0;
     y = []
@@ -88,13 +88,13 @@ suOlsonDiffAsym = []
 #p1Analytic = GetFromFile("../data/P1AnalyticData.txt")
 #EFM,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonEddingtonFactorMinerbo.txt");
 #EFM2,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo2.txt");
-suOlsonDiffNumerit,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
+#suOlsonDiffNumerit,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
 suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1Data.txt")
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
 #suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
 #suOlsonP1MUAB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1MUABData.txt")
 #P1AB ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1ABData.txt");
-transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
+#transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
 #suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
 #suOlsonTransp = [];
@@ -104,7 +104,7 @@ transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 line44, = plt.plot(x1[0:500],suOlsonP1Numerit[0][0:500],'b',label="P1")
 #line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
 #line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
-line4, = plt.plot(x2[0:500],suOlsonDiffNumerit[0][0:500],'--b',label="Diffusion")
+#line4, = plt.plot(x2[0:500],suOlsonDiffNumerit[0][0:500],'--b',label="Diffusion")
 #line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
 #line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
 #line5, = plt.plot(x1[0:500],P1AB[0][0:500],'b',label="P1-AB");

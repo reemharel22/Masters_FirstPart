@@ -4,9 +4,9 @@
 #include <omp.h>
 #include <time.h>
 #include <malloc.h>
-#define N 10
-#define X 10
-#define n (N*2 + 1)
+#define N 60
+#define X 60
+#define n (((N*2) + 1))
 void matrixDotVector(double mat[][N],double (*vec)[N][N],int j);
 void printMatrix(double mat[][N]);
 void printMatrix2(double mat[][n]);
@@ -30,9 +30,9 @@ double alpha = 1;
 double arad = 7.56E-15;
 double eps = 1;
 double constOpacity = 1;
-double c = 3E10;
+double c = 1;
 int main() {
-  int k,p,h,i=0,j=0;
+  int i=0,j=0;
   double sigma;
   double lambdaE,lambdaT,Tp,x0,t0;
   double b,d,Src;
@@ -101,10 +101,12 @@ int main() {
        
       //this is where we calculate the next Temperture !
        T[j][i] = ((T[j][i-1]) + deltaT*c*coeff*E[j][i]) / (coeff*c*deltaT + 1.0);
+       printf("%lf\t",E[j][i-1]);
        if (i > 0 && i < 50) {
-        // printf("%lf\n", E[j][i]);
+   //      printf("%lf\n", E[j][i]);
        }
      }
+     printf("\n");
      //#pragma omp parallel for default(shared) private (Src)
      for ( j = 0; j < n; j+=2) {
          Src = 1;
@@ -254,7 +256,6 @@ void setMatrixForE(double (*mat)[n][n],double deltaX,double deltaT,double sigmaT
           (*mat)[i][i+1] = deltaT*c*c/(3.0*deltaX);
       }
       k++;
-      printf("%lf\n",-deltaT*c*c/(3.0*deltaX));
   }
   k = 0;
   for (i = 0; i < n; i+=2) {
@@ -262,7 +263,7 @@ void setMatrixForE(double (*mat)[n][n],double deltaX,double deltaT,double sigmaT
     if (i != 0) {
       (*mat)[i][i-1] = -deltaT/deltaX;
     }
-    if (i != n-1) {
+    if (i != n-1 && i != 0) {
       (*mat)[i][i+1] = deltaT/deltaX;
     }
   }

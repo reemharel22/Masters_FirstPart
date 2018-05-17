@@ -98,7 +98,6 @@ int main(int argc,char *argv[]) {
           copySolve = &copyFromSolutionP1;
           BuildZ();
       } else if (p == 3) {
-          //deltaX = 0.005;
         funcptr = &buildNoEF;
         applyTandS = &ApplyTandSourceP1;
         copySolve = &copyFromSolutionP1;
@@ -386,7 +385,7 @@ void constructLUDP1(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
         if (i % 2 == 1 ) {//E
              (*L)[i] = -deltaT/deltaX;
         } else {
-            (*L)[i] = (-c*c*deltaT)/(3*deltaX);
+            (*L)[i] = (-c*c*deltaT)/(3.0*deltaX);
             j++;
             
         }
@@ -408,12 +407,7 @@ void constructLUDP1(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     //@@@@@@@added
     if (!constOpacity) {
       (*mainD)[0] = 1.0;
-      (*U)[0] = c;
-     // (*mainD)[1] = 1;
-     // (*U)[1] = 2.0/c;
-    //  (*L)[1] = 0;
-     // (*mainD)[0] = 1.0 + deltaT*c*getOpacity(0,currentTimeStep-1) + c*deltaT/(3.0*deltaX);
-      //(*U)[0] = 0;
+      (*U)[0] = c*0.5;
     }
 }
 
@@ -564,9 +558,7 @@ void CalculateT(int i,double deltaT) {
         double cap = getCv(j,i-1);
         double coeff = (getOpacity(j,i-1) * 4.0  * pow(t,3) * arad) 
         / (cap);
-        //printf("%lf\t",E[j][i]);
         T[j][i] = ((T[j][i-1]) + deltaT*c*coeff*E[j][i]) / (coeff*c*deltaT + 1.0);
-        //printf("%lf\t",T[j][i]);
      }
     // printf("\n");
 }
@@ -581,11 +573,7 @@ void ApplyTandSourceP1(int i,double deltaX,double deltaT) {
     }
     //@@@added this
     if (!constOpacity) {
-      solve[0] = 2.0*getFinc()/arad;
-   //   solve[1] = -4.0*get/c
-      //printf("%lf\n",getFinc());
-     // solve[0] += 4.0*c*getFinc()*deltaT/(3.0*deltaX*arad);
-       //printf("%lf\n",solve[0]);
+      solve[0] = 2.0*getFinc();
     }
 }
 
@@ -904,5 +892,5 @@ double getTH(){
 }
 
 double getFinc(){
-    return c*arad/4.0;
+    return arad*4.0/c;
 }
