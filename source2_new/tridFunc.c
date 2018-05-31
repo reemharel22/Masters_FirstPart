@@ -18,7 +18,7 @@ void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD
         const double m = 1.0f / (mainD[i] - L[i] * U[i - 1]);
         U[i] = U[i] * m;
         (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;
-       
+
     }
     /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
     for (i = N - 2; i >=0 ; i--) {
@@ -158,7 +158,7 @@ void buildEFKershaw(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N]
 void buildNoEF(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j)  {
     int i ;
     for ( i = 0; i < X; i++) {
-       (*EF[i]) = (double)1.0/(3.0 * getOpacity(i,j));
+       (*EF[i]) = (double)1.0/(3.0 );
     }
 }
 

@@ -79,26 +79,26 @@ def ScatterdY(transportX,points,x1):
     return y;
 #start of the main
 N = 5001;
-MX = XXX("../data/MX_11.txt");
-MY = XXX("../data/MY_11.txt");
-LPX = XXX("../data/LPX_1.txt");
-LPY = XXX("../data/LPY_1.txt");
+#MX = XXX("../data/MX_11.txt");
+#MY = XXX("../data/MY_11.txt");
+##LPX = XXX("../data/LPX_1.txt");
+#LPY = XXX("../data/LPY_1.txt");
 suOlsonP1Numerit = []
 p1Analytic = []
-FLM,x1 = SuOlsonMyNumericSolution("../data/SuOlsonFluxLimitersDataMinerbo.txt");
-FLLP,x1 = SuOlsonMyNumericSolution("../data/SuOlsonFluxLimitersDataLP.txt");
-FLK,x1 = SuOlsonMyNumericSolution("../data/SuOlsonFluxLimitersDataKershaw.txt");
-p1Analytic = GetFromFile("../data/P1AnalyticData.txt")
-EFM,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo.txt");
+#FLM,x1 = SuOlsonMyNumericSolution("../data/SuOlsonFluxLimitersDataMinerbo.txt");
+#FLLP,x1 = SuOlsonMyNumericSolution("../data/SuOlsonFluxLimitersDataLP.txt");
+#FLK,x1 = SuOlsonMyNumericSolution("../data/SuOlsonFluxLimitersDataKershaw.txt");
+#p1Analytic = GetFromFile("../data/P1AnalyticData.txt")
+#EFM,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo.txt");
 #EFM2,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo2.txt");
 suOlsonP1Numerit,x2 = P1MyNumericSolution("../data/SuOlsonP1Data.txt")
-EFLP,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorLP.txt");
-EFK,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorKershaw.txt");
+#EFLP,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorLP.txt");
+#EFK,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorKershaw.txt");
 transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 
-suOlsonTransp = [];
-suOlsonTransp = GetFromFile("../data/SuOlsonTransportData.txt")
-line3, = plt.plot(suOlsonTransp[0],suOlsonTransp[TT],'^k',label="Transport");
+#suOlsonTransp = [];
+#suOlsonTransp = GetFromFile("../data/SuOlsonTransportData.txt")
+#line3, = plt.plot(suOlsonTransp[0],suOlsonTransp[TT],'^k',label="Transport");
 #line4 = plt.plot(MX,MY,'--r',label="Minerbo");
 #line56 = plt.plot(LPX,LPY,'--g',label="LP");
 line5, = plt.plot(x1[0:108],p1Analytic[TT-1][0:500],'--k',label="P1-Analytic");

@@ -1,12 +1,12 @@
 all: soNumerit soEF so
 
-soNumerit: SuOlsonNumerit.c  
+soNumerit: SuOlsonNumerit.c
 	gcc -o soNumerit SuOlsonNumerit.c -lm -fopenmp
 
 soEF: SuOlsonEddingtonFactor.c
 	gcc -o soEF SuOlsonEddingtonFactor.c -lm -fopenmp
 
-so: tridFunc.o SuOlsonAll.c
+so: tridFunc.o SuOlsonAll.c SuOlsonAll.h
 	gcc -o so SuOlsonAll.c tridFunc.o -lm -fopenmp
 
 tridFunc: tridFunc.c tridFunc.h

@@ -28,7 +28,80 @@ def SuOlsonMyNumericSolution(fname):
                 return y,myList[0]
     y.append(myList[ int(t0*100) +2])
     return y,myList[0]
-def XXX(fname):
+def SuOlsonMyNumericSolution1(fname):
+        k = 0;
+        y = []
+        i = 0;
+        myList = [];
+        f = open(fname,"r")
+        with open(fname) as f:
+            for line in f:  #Line is a string
+                numbers_str = line.split()
+                #convert numbers to floats
+                numbers_float = [float(x) for x in numbers_str]
+                myList.append(numbers_float)
+                i = i + 1;
+                if (i == int(t0*50) + 3):
+                    y.append(myList[ int(t0*50) +2])
+                    return y,myList[0]
+        y.append(myList[ int(t0*50) +2])
+        return y,myList[0]
+def SuOlsonMyNumericSolution2(fname):
+        k = 0;
+        y = []
+        i = 0;
+        myList = [];
+        f = open(fname,"r")
+        with open(fname) as f:
+            for line in f:  #Line is a string
+                numbers_str = line.split()
+                #convert numbers to floats
+                numbers_float = [float(x) for x in numbers_str]
+                myList.append(numbers_float)
+                i = i + 1;
+                if (i == int(t0*200) + 3):
+                    y.append(myList[ int(t0*200) +2])
+                    return y,myList[0]
+        y.append(myList[ int(t0*200) +2])
+        return y,myList[0]
+def SuOlsonMyNumericSolution3(fname):
+        k = 0;
+        y = []
+        i = 0;
+        myList = [];
+        f = open(fname,"r")
+        with open(fname) as f:
+            for line in f:  #Line is a string
+                numbers_str = line.split()
+                #convert numbers to floats
+                numbers_float = [float(x) for x in numbers_str]
+                myList.append(numbers_float)
+                i = i + 1;
+                if (i == int(t0*1000) + 3):
+                    y.append(myList[ int(t0*1000) +2])
+                    return y,myList[0]
+        y.append(myList[ int(t0*1000) +2])
+        return y,myList[0]
+
+def SuOlsonMyNumericSolution4(fname):
+        k = 0;
+        y = []
+        i = 0;
+        myList = [];
+        f = open(fname,"r")
+        with open(fname) as f:
+            for line in f:  #Line is a string
+                numbers_str = line.split()
+                #convert numbers to floats
+                numbers_float = [float(x) for x in numbers_str]
+                myList.append(numbers_float)
+                i = i + 1;
+                if (i == int(t0*2000) + 3):
+                    y.append(myList[ int(t0*2000) +2])
+                    return y,myList[0]
+        y.append(myList[ int(t0*2000) +2])
+        return y,myList[0]
+def AAA(fname):
     k = 0;
     y = []
     i = 0;
@@ -81,39 +154,57 @@ def ScatterdY(transportX,points,x1):
 N = 5001;
 suOlsonDiffNumerit = []
 suOlsonP1Numerit = []
-p1Analytic = []
+p1An1alytic = []
 suOlsonP1MUAB = []
 suOlsonDiffMUB = []
 suOlsonDiffAsym = []
 #p1Analytic = GetFromFile("../data/P1AnalyticData.txt")
 #EFM,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonEddingtonFactorMinerbo.txt");
 #EFM2,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo2.txt");
-#suOlsonDiffNumerit,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
-suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1Data.txt")
+#suOlsonDiffNumerit,x2 = SuOlsonMyNumericSolution("../data/Temp/diffsuindt1.txt")
+#suOlsonDiffMUB,x1 =SuOlsonMyNumericSolution1("../data/Temp/Diff_TH5_DT02.txt")
+#suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/Diff_TH5_DT01.txt")
+#p1Analytic,x1 = SuOlsonMyNumericSolution3("../data/Temp/Diff_TH5_DT001.txt")
+#suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution2("../data/Temp/Diff_TH5_DT005.txt")
+#t0 = 20;
+#p1Analytic,x2 = SuOlsonMyNumericSolution("../data/Temp/001.txt")
+#t0=30line441, = plt.plot(x1[0:3000],suOlsonDiffMUB[0][0:3000],'k',label="Diffusion dt=0.002")
+#suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution1("../data/Temp/002.txt")
+#suOlsonDiffNumerit,x2 = SuOlsonMyNumericSolution4("../data/Temp/SuOlsonData.txt")
+suOlsonDiffMUB,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt")
+#for i in range (0,3000):
+    #suOlsonDiffNumerit[0][i] = suOlsonDiffNumerit[0][i]/1160500
+    #suOlsonP1Numerit[0][i] = suOlsonP1Numerit[0][i]/1160500
+#    p1Analytic[0][i] = p1Analytic[0][i]/1160500
+#    suOlsonDiffAsym[0][i] = suOlsonDiffAsym[0][i]/1160500
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
 #suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
-#suOlsonP1MUAB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1MUABData.txt")
-#P1AB ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1ABData.txt");
+suOlsonP1MUAB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1MUABData.txt")
+#P1AB ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1MUABData.txt");
 #transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
 #suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
 #suOlsonTransp = [];
 #suOlsonTransp = GetFromFile("../data/SuOlsonTransportData.txt")
 #line3, = plt.plot(suOlsonTransp[0],suOlsonTransp[TT],'^g',label="Transport");
-#line6, = plt.plot(x2[0:500],suOlsonP1MUAB[0][0:500],'k',label="P1 muAB");
-line44, = plt.plot(x1[0:500],suOlsonP1Numerit[0][0:500],'b',label="P1")
+line6, = plt.plot(x2[0:500],suOlsonP1MUAB[0][0:500],'k',label="P1 muAB");
+#line441, = plt.plot(x1[0:3000],suOlsonDiffMUB[0][0:3000],'k',label="Diffusion dt=0.02")
+#line44, = plt.plot(x1[0:3000],suOlsonP1Numerit[0][0:3000],'g',label="Diffusion dt = 0.01")
+
 #line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
-#line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
-#line4, = plt.plot(x2[0:500],suOlsonDiffNumerit[0][0:500],'--b',label="Diffusion")
-#line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
-#line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
+line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'k',label="Disc Asym Diffusion")
+
+#line411, = plt.plot(x1[0:3000],suOlsonDiffAsym[0][0:3000],'r',label="Diffusion dt = 0.005")
+#line7, = plt.plot(x1[0:3000],p1Analytic[0][0:3000],'b',label="Diffusion dt = 0.001")
+#line4, = plt.plot(x2[0:3000],suOlsonDiffNumerit[0][0:3000],'--g',label="Diffusion dt = 0.0005")
+#line8, = plt.p30lot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
 #line5, = plt.plot(x1[0:500],P1AB[0][0:500],'b',label="P1-AB");
 #legend
-x = [0.5,1,2,3,4]
-y = [0,0.001,0.01,0.1,1,3]
+#x = [0.5,1,2,3,4]
+#y = [0,0.001,0.01,0.1,1,3]
 #plt.yscale('log')
 #plt.xscale('log')
-plt.ylim(0,1)
+#plt.ylim(0,1)
 plt.xlim(0,2)
 #plt.axis([0.3,8,0.001,3]);
 #plt.xscale('log')

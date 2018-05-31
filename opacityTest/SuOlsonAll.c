@@ -53,7 +53,7 @@ double arad = 7.56E-15;
 double P1 = 0;
 //double A = 3,B = 3;
 double lambdaT;
-double deltaX = 0.025;
+double deltaX = 0.01;
 double deltaT = 0.01;
 int constOpacity = 0;
 int main(int argc,char *argv[]) {
@@ -160,8 +160,8 @@ int main(int argc,char *argv[]) {
         for ( j = 0; j < X; j++) {
             if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000) {
                 if (j == 1 || j == 10 || j == 17 || j == 31 || j == 45 || j == 50 || j == 56 || j == 75 || j == 100 || j == 133 || j == 177)
-                //printf("%f\t",pow(T[j][i],0.25));
-                    printf("%f\t",E[j][i]);
+                printf("%f\t",pow(T[j][i],0.25));
+                  //  printf("%f\t",E[j][i]);
                    // printf("%f\t",pow(E[j][i],0.5));
             }
         }
@@ -191,7 +191,7 @@ void copyFromSolutionP1(double*solve,double(*E)[X][N],double(*F)[X+1][N],int j) 
     k++;
   }
   if (!constOpacity) {
-      (*F)[0][j] = 0.5;
+    //  (*F)[0][j] = 0.5;
   }
   (*F)[X][j] = solve[NN-1];
 }

@@ -7,10 +7,10 @@
 #include <malloc.h>
 #include <string.h>
 #include "tridFunc.h"
-#define N 5000
-#define X 5000
+#define N 3000
+#define X 3000
 //#define NN (((X*2) + 1))
-#define NN 5000
+#define NN 3000
 //#define N 10
 //#define X 10
 //#define NN (((X*2) + 1))
@@ -51,7 +51,7 @@ double B[X];
 double P1 = 0;
 //double A = 3,B = 3;
 double lambdaT;
-double deltaX = 0.025;
+double deltaX = 0.01;
 double deltaT = 0.01;
 int constOpacity = 0;
 int main(int argc,char *argv[]) {
@@ -158,8 +158,8 @@ int main(int argc,char *argv[]) {
         for ( j = 0; j < X; j++) {
             if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000) {
                 if (j == 1 || j == 10 || j == 17 || j == 31 || j == 45 || j == 50 || j == 56 || j == 75 || j == 100 || j == 133 || j == 177)
-                    printf("%f\t",pow(T[j][i],0.25));
-             //printf("%f\t",E[j][i]);
+                  //  printf("%f\t",pow(T[j][i],0.25));
+             printf("%f\t",E[j][i]);
            //           printf("%f\t",pow(E[j][i],0.5));
             }
         }
@@ -195,7 +195,7 @@ void copyFromSolutionDiff(double*solve,double(*E)[X][N],double(*F)[X+1][N],int j
     int i = 0;
     for ( i = 0; i < X; i++) {
       (*E)[i][j] = solve[i];
-     
+
     }
   //  printf("\n");
 }

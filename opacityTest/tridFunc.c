@@ -17,13 +17,10 @@ void solveTriagonal(int N,float(*solve)[N],float L[N],float U[N],float mainD[N])
         const float m = 1.0f / (mainD[i] - L[i] * U[i - 1]);
         U[i] = (float)U[i] * m;
         (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;
-        
+
   }
-   for ( i = 0;i < N;i++){
-     
-   }
- // printf("\n\n");
- 
+
+
        //printf("\n");
     /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
     for (i = N-2; i >=0 ; i--) {
