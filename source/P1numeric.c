@@ -151,12 +151,12 @@ void solveTriagonal(float(*solve)[n],float L[n],float U[n],float mainD[n])
   /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
   for (i = n - 2; i >=0 ; i--){
   //    (*solve)[i] -= U[i] * (*solve)[i + 1];
-       printf("BEFORE\tsolve: %15.15lf\tU: %15.15lf\ti is: %d\tcurrentsolve is:%15.15lf\n",(*solve)[i+1],U[i],i,(*solve)[i]);
+     //  printf("BEFORE\tsolve: %15.15lf\tU: %15.15lf\ti is: %d\tcurrentsolve is:%15.15lf\n",(*solve)[i+1],U[i],i,(*solve)[i]);
         (*solve)[i] -= (U[i] * (*solve)[i + 1]);
 
-         printf("AFTER\tsolve: %15.15lf\tU: %15.15lf\ti is: %d\tcurrentsolve is:%15.15lf\n",(*solve)[i+1],U[i],i,(*solve)[i]);
+      //   printf("AFTER\tsolve: %15.15lf\tU: %15.15lf\ti is: %d\tcurrentsolve is:%15.15lf\n",(*solve)[i+1],U[i],i,(*solve)[i]);
        }
-    printf("\n\n");
+  //  printf("\n\n");
 }
 
 /*

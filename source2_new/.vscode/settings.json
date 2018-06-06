@@ -3,5 +3,6 @@
         "stdio.h": "c",
         "math.h": "c",
         "tridfunc.h": "c"
-    }
+    },
+    "python.linting.pylintEnabled": false
 }

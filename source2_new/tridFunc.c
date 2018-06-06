@@ -247,7 +247,6 @@ void buildDDiscDiffAsym(int X,int N,double (*D)[X], double E[X][N],double F[X+1]
     int i = 0;
     for (i = 0; i < X; i++) {
         double weff = calculateWeff(i,j);
-        //printf(" %lf ",weff);
         (*D)[i] = 1.0/calculateB(weff);
         (*D)[i] = (*D)[i] / calculateMu2(weff);
     }

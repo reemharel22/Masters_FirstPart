@@ -10,6 +10,7 @@ void buildEFLP(int X,int N ,double (*EF)[X], double E[X][N],double F[X+1][N],dou
 void buildEFMinerbo(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
 void buildNoEF(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
 void buildDKershaw(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
+void buildDLarsen(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
 void buildDLP(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
 void buildDMinerbo(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
 void buildDDiff(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double [X][N],int j);

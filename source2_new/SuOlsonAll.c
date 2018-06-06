@@ -39,9 +39,12 @@ double calculateA(double weff);
 int setUpProgram(int,char*arg[]);
 double getSource(int space,int time1);
 double getCv(int,int);
+double calculateWeffNonAvg(int,int);
 double getT(int space,int time1);
 void setUpInitialCondition();
 double getTH();
+double Avg1(double,double);
+double Avg2(double,double);
 void applyBC();
 int currentTimeStep = 0;
 double E[X][N],T[X][N];
@@ -58,9 +61,10 @@ double arad = 7.56E-15;
 double P1 = 0;
 double Cv = 0;
 double alpha = 1.0;
+int Classic = 0;
 //double A = 3,B = 3;
 double lambdaT;
-double deltaX = 0.005;
+double deltaX = 0.01;
 double deltaT = 0.01;
 double TH = 1.0;
 int constOpacity = 0;
@@ -105,31 +109,26 @@ int main(int argc,char *argv[]) {
         copySolve = &copyFromSolutionP1;
         BuildLUD = &constructLUDP1;
        } else if (p == 4) {
-        deltaX = 0.01;
         funcptr = &buildABLambdaT;
         applyTandS = &ApplyTandSourceP1;
         copySolve = &copyFromSolutionP1;
         BuildLUD = &constructLUDP1AB;
     } else if (p == 5) {
-        deltaX = 0.01;
         funcptr = &buildDKershaw;
         BuildLUD = &constructLUDDiff;
         applyTandS = &ApplyTandSourceDiff;
         copySolve = &copyFromSolutionDiff;
     }else if (p == 6) {
-        deltaX = 0.01;
         funcptr = &buildDLP;
         BuildLUD = &constructLUDDiff;
         applyTandS = &ApplyTandSourceDiff;
         copySolve = &copyFromSolutionDiff;
     }else if (p == 7) {
-        deltaX = 0.01;
         funcptr = &buildDMinerbo;
         BuildLUD = &constructLUDDiff;
         applyTandS = &ApplyTandSourceDiff;
         copySolve = &copyFromSolutionDiff;
     } else if (p == 8) {
-        deltaX = 0.01;
         funcptr = &buildDDiff;
         BuildLUD = &constructLUDDiff;
         applyTandS = &ApplyTandSourceDiff;
@@ -143,14 +142,12 @@ int main(int argc,char *argv[]) {
         BuildLUD = &constructLUDP1MUAB;
     }
     else if (p == 11) {
-        deltaX = 0.01;
         funcptr = &buildDDiffAsym;
         applyTandS = &ApplyTandSourceDiff;
         copySolve = &copyFromSolutionDiff;
         BuildLUD = &constructLUDDiff;
     }
     else if (p == 12) {
-        deltaX = 0.01;
         funcptr = &buildDDiscDiffAsym;
         applyTandS = &ApplyTandSourceDiff;
         copySolve = &copyFromSolutionDiff;
@@ -403,10 +400,9 @@ void constructLUDP1(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
       } else {//F
           double opacityprev = getOpacity(k-1,currentTimeStep-1);
           double opacitycurr = getOpacity(k,currentTimeStep-1);
-        //  opacity = (2.0*opacityprev*opacitycurr)/(opacityprev+opacitycurr);
+         // opacity = (2.0*opacityprev*opacitycurr)/(opacityprev+opacitycurr);
           //opacity = (opacityprev+opacitycurr)/2.0;
           opacity = getOpacity(k-1,currentTimeStep-1);
-          //(*mainD)[i] = 1.0 + deltaT*opacity;
           (*mainD)[i] = 1.0 + deltaT*opacity*c;
           j++;
       }
@@ -415,8 +411,6 @@ void constructLUDP1(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     if (!constOpacity) {
       (*mainD)[0] = 1.0;
       (*U)[0] = c/2.0;
-      //(*mainD)[0] += ((deltaT*c*2.0)/(2.0*deltaX));
-      //(*U)[0] = c*c*deltaT/(3.0*deltaX);
     }
 
 }
@@ -424,12 +418,14 @@ void constructLUDP1(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
 void constructLUDP1AB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     int i,j = 0;
     double opacity;
-    for (i = 0; i < NN-1; i++) {
+    double bAvg,muAvg,aAvg;
+   for (i = 0; i < NN-1; i++) {
       if (i % 2 == 1) {//build E part
           (*U)[i] = deltaT/deltaX;
       } else {//build F part
           if (i != NN-1 && i != 0) {
-            (*U)[i] = (deltaT*c*c)/(deltaX*A[j]);
+              aAvg = Avg2(A[j],A[j]);
+            (*U)[i] = (deltaT*c*c)/(deltaX*aAvg);
           }
         j++;
       }
@@ -440,8 +436,9 @@ void constructLUDP1AB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
         if (i % 2 == 1) {//E
              (*L)[i] = -deltaT/deltaX;
         } else {//F
-            (*L)[i] = (-deltaT*c*c)/(deltaX*A[j] + 1e-15);
-            j++;
+            aAvg = Avg2(A[j],A[j]);
+            (*L)[i] = (-deltaT*c*c)/(deltaX*aAvg);
+             j++;
         }
     }
     j = 0;
@@ -449,20 +446,24 @@ void constructLUDP1AB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     for (i = 0; i < NN; i++) {
       if (i % 2 == 1) {//E
           opacity = getOpacity(k,currentTimeStep-1);
-          (*mainD)[i] = 1 + deltaT*c*opacity;
+          (*mainD)[i] = 1.0 + deltaT*c*opacity;
+          // k++;
       } else {//F
-        k++;
+      k++;
+       double opacityprev = getOpacity(k-1,currentTimeStep-1);
+          double opacitycurr = getOpacity(k,currentTimeStep-1);
           opacity = getOpacity(k-1,currentTimeStep-1);
-          (*mainD)[i] = 1.0 + deltaT*c*opacity*B[j]/(A[j]);
-          //printf("%lf\t",opacity);
+       // opacity = Avg2(opacitycurr,opacityprev);
+           aAvg = Avg2(A[j],A[j]);
+           bAvg = Avg2(B[j],B[j]);
+         //opacity = (2.0*opacityprev*opacitycurr)/(opacityprev+opacitycurr);
+          (*mainD)[i] = 1.0 + deltaT*c*opacity*bAvg/aAvg;
           j++;
-
       }
     }
     //@@@ADDED
     if (!constOpacity) {
         (*mainD)[0] = 1.0;
-        //(*mainD)[0] = (double)1.5;
         (*U)[0] = c*calculateMu(0,currentTimeStep-1);
     }
 }
@@ -504,20 +505,41 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
 void constructLUDP1MUAB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     int i,j = 0;
     constructLUDP1AB(L,U,mainD);
- //    (*L)[0] = 0.0;
+     //(*L)[0] = 0.0;
     j = 1;
     for ( i = 1; i < NN; i++) {
         if (i % 2 == 1) {//E
             // (*L)[i] = -deltaT/deltaX;
         } else {
             //(*L)[i] = (-EF[j-1]*deltaT)/(deltaX);
-            double muprev,mucurrent,mu;
-            muprev = calculateMu(j-1,currentTimeStep-1);
-            mucurrent = calculateMu(j,currentTimeStep-1);
-            mu = mucurrent/muprev;
-            (*U)[i] = (deltaT*c*c*mu)/(deltaX*A[j]);
-            j++;
+              if (i != NN-1 && i != 0) {
+                double muprev,mucurrent,mu;
+                double bAvg,muAvg,aAvg;
+                double opacity = getOpacity(-1 + i/2,currentTimeStep - 1);
+                
+                muprev = calculateMu2(calculateWeffNonAvg(j-1,currentTimeStep - 1));
+                mucurrent = calculateMu2(calculateWeffNonAvg(j,currentTimeStep - 1));
+
+                bAvg = Avg2(B[ (i/2)],B[i/2]);
+                aAvg = Avg2(A[(i/2)],A[i/2]);
+                muAvg = Avg2(mucurrent,mucurrent);
+                //mu = mucurrent/muprev;    
+                //(*U)[i] = (deltaT*c*c*mu)/(deltaX*A[j]);
+               
+                (*U)[i] = (deltaT*c*c*mucurrent)/(muAvg*deltaX*aAvg);
+               (*L)[i] = -(deltaT*c*c*muprev)/(deltaX*aAvg*muAvg );
+              // (*L)[i] = (-deltaT*c*c)/(mu*deltaX*A[j] );
+              // (*mainD)[i] = 1.0 + deltaT*c*opacity*bAvg/(aAvg);
+                j++;
+              }
         }
+    }
+    (*L)[0] = 0.0;
+    (*U)[NN-1] = 0.0;
+      if (!constOpacity) {
+        (*mainD)[0] = 1.0;
+        (*U)[0] = c*calculateMu2(calculateWeffNonAvg
+        (0,currentTimeStep - 1));
     }
 }
 
@@ -529,7 +551,8 @@ void constructLUDDiffMUB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     for (i = 0; i < NN-1; i++) {
         if (i != X-1) {
             mu = calculateMu(i+1,currentTimeStep-1);
-            (*U)[i] = -lambda*c *mu*(EF[i] + EF[i+1])/2.0;
+          //  (*U)[i] = -lambda * c *mu*(EF[i] + EF[i+1])/2.0;
+          (*U)[i] = -lambda * c *mu*(EF[i+1]);
         }
     }
 
@@ -538,14 +561,16 @@ void constructLUDDiffMUB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     for ( i = 1; i < NN; i++) {
         if (i != 0 ) {
             mu = calculateMu(i-1,currentTimeStep-1);
-            (*L)[i] = -lambda *c* mu*(EF[i-1]+EF[i])/2.0;
+           // (*L)[i] = -lambda *c* mu*(EF[i-1]+EF[i])/2.0;
+               (*L)[i] = -lambda * c *mu*(EF[i]);
         }
     }
     j = 0;
     for (i = 0; i < NN; i++) {
         mu = calculateMu(i,currentTimeStep-1);
-        opacity = getOpacity(i,currentTimeStep-1);
-        (*mainD)[i] = 1 + deltaT*c*opacity + lambda*c*mu*(EF[i+1]+2*EF[i] + EF[i-1])/(2.0);
+        opacity = getOpacity(i-1,currentTimeStep-1);
+      //  (*mainD)[i] = 1 + deltaT*c*opacity + lambda*c*mu*(EF[i+1]+2*EF[i] + EF[i-1])/(2.0);
+      (*mainD)[i] = 1 + deltaT*c*opacity + lambda*c*mu*(EF[i+1] + EF[i]);
     }
     //@@@ added 2*deltaX
     double bb= 0;
@@ -568,10 +593,8 @@ void CalculateT(int i,double deltaT) {
         double cap = getCv(j,i-1);
         double coeff = (getOpacity(j,i-1) * 4.0  * pow(t,3) * arad)
         / (cap);
-
         T[j][i] = ((T[j][i-1]) + deltaT*c*coeff*E[j][i]) / (coeff*c*deltaT + 1.0);
      }
-    // printf("\n");
 }
 
 void ApplyTandSourceP1(int i,double deltaX,double deltaT) {
@@ -635,8 +658,47 @@ double calculateWeff(int space,int time1) {
     if (space >= X) {
       space = X-1;
     }
-    tt = T[space][time1];
+     tt = T[space][time1];
     ee = E[space][time1];
+    //weff for non-classic, avg
+    if (!constOpacity /*&& P1*/) {
+        tt = pow(Avg1(getT(space,time1),getT(space-1,time1)),4);
+        tt = pow(arad,1)*tt;
+        tt = Avg1(T[space][time1],T[space-1][time1]);
+        ee = Avg1(E[space][time1],E[space-1][time1]);
+    }
+    if ( !constOpacity && space == 0) {
+           // Src = (2.0*getFinc() - c*E[0][time1]/2.0)/c ;
+            if (Src < 0) {
+                Src = 0;
+            }
+            tt = T[space][time1];
+            ee = E[space][time1];
+        }
+    
+    weff = (opacity * tt + Src ) / (opacity*ee + 1e-15);
+    return weff;
+}
+
+double calculateWeffNonAvg(int space,int time1) {
+    double weff;
+    double tt,ee;
+    double opacity = getOpacity(space,time1);
+    double Src = getSource(space,time1);
+    if (space >= X) {
+      space = X-1;
+    }
+     tt = T[space][time1];
+    ee = E[space][time1];
+    //weff for non-classic, avg
+    if (!constOpacity) {
+        if (space == 0) {
+            Src = (2.0*getFinc() - c*E[0][time1]/2.0)/c;
+            tt = T[space][time1];
+            ee = E[space][time1];
+        }
+    }
+    
     weff = (opacity * tt + Src ) / (opacity*ee + 1e-15);
     return weff;
 }
@@ -673,9 +735,9 @@ double calculateA(double weff) {
       return 0.96835 - 0.437*weff;
     } else {
         double a = ( 0.247 * (0.433 + 0.421*weff -2.681*weff*weff
-             - 1.82*pow(weff,3.0) + 4.9*pow(weff,4.0) -1.06*pow(weff,5.0)
+             - 1.82*pow(weff,3.0) + 4.9*pow(weff,4.0) -1.058*pow(weff,5.0)
               + 2.56*pow(weff,6.0) ) );
-        double b =  pow(0.33 + 0.159*weff - 0.567 * pow(weff,2.0) - pow(weff,3.0)  ,2.0);
+        double b =  pow(0.327 + 0.159*weff - 0.567 * pow(weff,2.0) - pow(weff,3.0)  ,2.0);
       return a/b ;
     }
 }
@@ -734,7 +796,7 @@ double getOpacity(int space,int time1) {
         }
         double v = T[space][time1];
         double t  = pow(v/arad,0.25);
-        double a = 1.0/(pow(t/getTH(),3.0));
+        double a = 1.0/(pow(t/(getTH()),3));
         return a;
     }
 }
@@ -860,6 +922,7 @@ void setUpInitialCondition() {
     if (constOpacity) {
         for (i = 0; i < X; i++) {
           for ( j = 0; j < N; j++) {
+            //double tm = pow(10,-1.25)*5.0*getTH();
             double tm = pow(10,-1.25)*getTH();
               T[i][j] = E[i][j] = arad*pow(tm,4);
           }
@@ -872,12 +935,12 @@ void setUpInitialCondition() {
           }
         }
     }
-    for (i = 0; i < X+1; i++) {
+    for (i = 0; i < X; i++) {
       for ( j = 0; j < N; j++) {
-          F[j][i] =  pow(10,-5);
+          F[j][i] =  0.0;
       }
     }
-
+    F[N-1][X] = E[0][0];
     for ( i = 0; i < X; i++) {
         D[i] = EF[i] = (double)1.0/(3.0);
     }
@@ -913,4 +976,12 @@ void applyBC() {
     solve[0] = 2.0*getFinc();
     //solve[0] += 4.0*getFinc()*c*deltaT/(3.0*deltaX);
   }
+}
+
+double Avg1(double xx,double yy) {
+    return (xx + yy) / 2.0;
+}
+
+double Avg2(double xx,double yy) {
+   return (2.0 * xx * yy)/(xx + yy);
 }

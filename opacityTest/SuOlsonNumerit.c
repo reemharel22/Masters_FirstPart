@@ -4,8 +4,8 @@
 #include <omp.h>
 #include <time.h>
 #include <malloc.h>
-#define N 60
-#define X 60
+#define N 600
+#define X 600
 #define n (((N*2) + 1))
 void matrixDotVector(double mat[][N],double (*vec)[N][N],int j);
 void printMatrix(double mat[][N]);
@@ -29,8 +29,8 @@ double Cv = 0;
 double alpha = 1;
 double arad = 7.56E-15;
 double eps = 1;
-double constOpacity = 1;
-double c = 1;
+double constOpacity = 0;
+double c = 3E10;
 int main() {
   int i=0,j=0;
   double sigma;
@@ -53,9 +53,9 @@ int main() {
   lambdaT = deltaT;
   Src = 0;
   //setting up the matrices
-  for ( i = 0; i < n; i++) {
+    for ( i = 0; i < n; i++) {
       if (i%2 == 0) {
-          Src = 1;
+          Src=0;
           if (i*deltaX/2 >= x0)
           {
               Src = 0;
@@ -65,7 +65,7 @@ int main() {
           solve[i] = 0;
       }
   }
-  //solve[0] = 0.5;
+  solve[0] += 2.0*getFinc()*deltaT/deltaX;
   for (i = 0; i < X+1; i++) {
     for ( j = 0; j < N; j++) {
         F[i][j] = T[i][j] = E[i][j] = pow(10,-5);
@@ -101,22 +101,21 @@ int main() {
        
       //this is where we calculate the next Temperture !
        T[j][i] = ((T[j][i-1]) + deltaT*c*coeff*E[j][i]) / (coeff*c*deltaT + 1.0);
-       printf("%lf\t",E[j][i-1]);
-       if (i > 0 && i < 50) {
-   //      printf("%lf\n", E[j][i]);
-       }
+      if (T[j][i] < 0)
+    {
+      T[j][i] = pow(10,-5);
+    }
      }
-     printf("\n");
      //#pragma omp parallel for default(shared) private (Src)
-     for ( j = 0; j < n; j+=2) {
-         Src = 1;
-         if (j*deltaX/2 >= x0 || i*deltaT*c >= t0)
+    for ( j = 0; j < n; j+=2) {
+         Src = 0;
+         if (j*deltaX/2 >= x0 || i*deltaT >= t0)
          {
              Src = 0;
          }
-          solve[j] += getOpacity(j/2,i)*deltaT*T[j/2][i]*c+ Src*deltaT*c;
+          solve[j] += lambdaT*T[j/2][i]*c+ Src*deltaT*c;
      }
-    // solve[0] += 0.5;
+     solve[0] += 2.0*getFinc()*deltaT/deltaX;
     }
 
     for ( i = 0; i < N; i++) {
@@ -124,8 +123,8 @@ int main() {
         //if (i == 10/2 || i == 31/2 || i == 100/2 || i == 316/2 || i == 1000/2 || i == 3162/2  || i == 10000/2) {
         if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000){
                 if (j == 1 || j == 10 || j == 17 || j == 31 || j == 45 || j == 50 || j == 56 || j == 75 || j == 100 || j == 133 || j == 177)
-                    printf("%f\t",E[j][i]);
-               //     printf("%lf\t",pow(T[j][i],0.25));
+                   // printf("%f\t",E[j][i]);
+                    printf("%lf\t",pow(T[j][i],0.25));
             }
         }
             //if (i == 10/2 || i == 31/2 || i == 100/2 || i == 316/2 || i == 1000/2 || i == 3162/2  || i == 10000/2)
@@ -159,31 +158,21 @@ void solveTriagonal(double(*solve)[n],double L[n],double U[n],double mainD[n])
   int i,j;
   U[0] = U[0] / mainD[0];
   (*solve)[0] = (*solve)[0] / mainD[0];
-  for (j = 0; j < n; j++) {
-       // printf("%lf\t",mainD[j]);
-        
-    }
-    // printf("\n");
+
   /* loop from 1 to X - 1 inclusive, performing the forward sweep */
   for (i = 1; i < n; i++) {
       const double m = 1.0f / (mainD[i] - L[i] * U[i - 1]);
- 
-      U[i] = U[i] * m;
-           
+      U[i] = U[i] * m;  
       (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;
-     // printf("%lf\t", (*solve)[i]);
       
   }
 
   /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
   for (i = n - 2; i >=0 ; i--){
-      (*solve)[i] -= U[i] * (*solve)[i + 1];
-      // printf("BEFORE\tsolve: %15.15lf\tU: %15.15lf\ti is: %d\tcurrentsolve is:%15.15lf\n",(*solve)[i+1],U[i],i,(*solve)[i]);
-        //(*solve)[i] -= (U[i] * (*solve)[i + 1]);
-
-        // printf("AFTER\tsolve: %15.15lf\tU: %15.15lf\ti is: %d\tcurrentsolve is:%15.15lf\n",(*solve)[i+1],U[i],i,(*solve)[i]);
+      (*solve)[i] -= (double)(U[i] * (*solve)[i + 1]);
+    // printf("Solve i: %30.30lf\t Solve i+1: %30.30lf\t U i: %30.30lf\n",(*solve)[i],(*solve)[i+1],U[i]);
        }
-  //  printf("\n\n");
+    //printf("\n\n");
 }
 
 /*
@@ -263,11 +252,11 @@ void setMatrixForE(double (*mat)[n][n],double deltaX,double deltaT,double sigmaT
     if (i != 0) {
       (*mat)[i][i-1] = -deltaT/deltaX;
     }
-    if (i != n-1 && i != 0) {
+    if (i != n-1) {
       (*mat)[i][i+1] = deltaT/deltaX;
     }
   }
-  //(*mat)[0][0] += 0.5*lightspeed;
+  (*mat)[0][0] += 0.5*c*deltaT/deltaX;
 }
 
 
@@ -320,7 +309,7 @@ double getOpacity(int space,int time1) {
       
         double v = T[space][time1];
         double t  = pow(v,0.25);
-        double a = 1.0/(pow(t,3.0));
+        double a = 1.0/(pow(t,3.0) + 1e-15);
         return a;
         }
 }

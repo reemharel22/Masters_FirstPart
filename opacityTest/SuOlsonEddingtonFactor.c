@@ -4,8 +4,8 @@
 #include <omp.h>
 #include <time.h>
 #include <malloc.h>
-#define N 3000
-#define X 3000
+#define N 1000
+#define X 1000
 #define NN (((X*2) + 1))
 double epsilon = 0.00000000000000000000001;
 
@@ -81,13 +81,13 @@ int main() {
       if (i*deltaX >= x0) {
           Src = 0;
       }
-      solve[2*i + 1] = Src*deltaT;
+      solve[2*i] = Src*deltaT;
   }
-  solve[0] = 0.5;
+  //solve[0] = 0.5;
   //#pragma omp parallel for default(shared)
   for (i = 0; i < X; i++) {
     for ( j = 0; j < N; j++) {
-        T[i][j] = F[i][j] = pow(10,-5);
+        T[i][j] = F[i][j] = 0;
     }
   }
   for (i = 0; i < X+1; i++) {
