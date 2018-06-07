@@ -245,9 +245,10 @@ void buildDDiffAsym(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],
 
 void buildDDiscDiffAsym(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double T[X][N],int j) {
     int i = 0;
+    #pragma omp parallel for private (i,j)
     for (i = 0; i < X; i++) {
         double weff = calculateWeff(i,j);
-        (*D)[i] = 1.0/calculateB(weff);
+        (*D)[i] = 1.0/ (calculateB(weff) * getOpacity(i,j) );
         (*D)[i] = (*D)[i] / calculateMu2(weff);
     }
 }
