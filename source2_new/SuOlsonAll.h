@@ -1,6 +1,7 @@
 #ifndef SuOlsonAll_H_
 #define SuOlsonAll_H_
 double calculateWeff(int,int);
+double calculateWeffNonAvg(int,int);
 double getdx();
 double getdt();
 double calculateB(double);
