@@ -7,8 +7,8 @@
 #include <malloc.h>
 #include <string.h>
 #include "tridFunc.h"
-#define N 390
-#define X 390
+#define N 3000
+#define X 3000
 //#define NN (((X*2) + 1))
 //#define NN 3001
 //#define N 10
@@ -16,7 +16,7 @@
 #define NN (((X*2) + 1))
 //#define NN X
 //#define NN 10
-double epsilon = 0.00000000000000000000001;
+double epsilon = 1e-20;
 
 void buildABLambdaT(int XX,int NX ,double (*EF)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
 void copyFromSolutionP1(double*solve,double(*mat)[X][N],double (*m)[X+1][N],int j);
@@ -48,7 +48,7 @@ void applyBC();
 int currentTimeStep = 0;
 double E[X][N],T[X][N];
 //@@@CHANGED TO 2*NN +1
-double L[NN],U[NN],mainD[NN],F[X+1][N],EF[X+1],D[X],solve[NN];
+double L[NN],U[NN],mainD[NN],F[X+1][N],EF[X+1],D[X],solve[NN],Weff[X+1][N];
 double x0 = 0.5;
 double t0 = 10.0;
 double A[X+1];
@@ -65,7 +65,7 @@ int Classic = 0;
 double lambdaT;
 double previousWeff = 0;
 double deltaX = 0.01;
-double deltaT = 0.01;
+double deltaT = 0.005;
 double TH = 1.0;
 int constOpacity = 0;
 
@@ -135,7 +135,7 @@ int main(int argc,char *argv[]) {
         copySolve = &copyFromSolutionDiff;
     }
     else if (p == 9) {
-        deltaX = 0.01;
+        //deltaX = 0.01;
         funcptr = &buildABLambdaT;
         applyTandS = &ApplyTandSourceP1;
         copySolve = &copyFromSolutionP1;
@@ -178,6 +178,18 @@ int main(int argc,char *argv[]) {
         printf("\n");
     }
     //printMatrix(E);
+    FILE*fp1;
+    fp1 = fopen("../data/Temp/weff.txt","w");
+    for ( i = 0; i < N; i++) {
+      fprintf(fp1, "%f ",deltaT*c*(i) );
+    }
+     fprintf(fp1, "\n");
+    for ( j = 0; j < N; j++) {
+      for ( i = 0; i < N; i++) {
+            fprintf(fp1,"%f ",calculateWeffNonAvg(j,i));
+      }
+      fprintf(fp1,"\n");
+    }
     if (constOpacity == 1) {
         sendToFileE(p);
     }
@@ -423,19 +435,19 @@ void constructLUDP1AB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
       } else {//build F part
           if (i != NN-1 && i != 0) {
               aAvg = A[j];
-            (*U)[i] = (deltaT*c*c)/(deltaX*(aAvg + 1e-15));
+            (*U)[i] = (deltaT*c*c)/(deltaX*(aAvg));
           }
         j++;
       }
     }
     (*L)[0] = (*L)[1] = 0.0;
-    j = 1;
+    j = 0;
     for ( i = 1; i < NN; i++) {
         if (i % 2 == 1) {//E
              (*L)[i] = -deltaT/deltaX;
         } else {//F
             aAvg = A[j];
-            (*L)[i] = (-deltaT*c*c)/(deltaX*(aAvg + 1e-15));
+            (*L)[i] = (-deltaT*c*c)/(deltaX*(aAvg));
              j++;
         }
     }
@@ -446,22 +458,15 @@ void constructLUDP1AB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
           opacity = getOpacity(k,currentTimeStep-1);
           (*mainD)[i] = 1.0 + deltaT*c*opacity;
           if (opacity != opacity ) {
-            //  printf("%d\t%d\n",i,currentTimeStep);
               }
-          // k++;
       } else {//F
       k++;
        double opacityprev = getOpacity(k-1,currentTimeStep-1);
           double opacitycurr = getOpacity(k,currentTimeStep-1);
           opacity = getOpacity(k-1  ,currentTimeStep-1);
-         //opacity = Avg1(opacitycurr,opacityprev);
-        // opacity = (2.0*opacityprev*opacitycurr)/(opacityprev+opacitycurr);
-          if (A[j] == 0){
-              //printf("hey");
-          }
-          (*mainD)[i] = 1.0 + deltaT*c*opacity*B[j]/(A[j] + 1e-15);
+          (*mainD)[i] = 1.0 + deltaT*c*opacity*B[j]/(A[j]);
               if (opacity != opacity ) {
-              printf("%d\t%d\n",i,currentTimeStep);
+             // printf("%d\t%d\n",i,currentTimeStep);
               }
           j++;
       }
@@ -514,10 +519,8 @@ void constructLUDP1MUAB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     j = 1;
     for ( i = 1; i < NN-1; i++) {
         if (i % 2 == 1) {//E
-            // (*L)[i] = -deltaT/deltaX;
             ;
         } else {
-            //(*L)[i] = (-EF[j-1]*deltaT)/(deltaX);
               if (i != NN-1 && i != 0) {
                 double muprev,mucurrent,mu;
                 double bAvg,muAvg,aAvg;
@@ -530,15 +533,25 @@ void constructLUDP1MUAB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
                 //this mu and A is with omega average
                 double mucurrent1 = calculateMu2(calculateWeff(j,currentTimeStep - 1));
                 aAvg = A[j];
-                
-                if (i != N-2) {
-                     (*U)[i] = (deltaT*c*c*mucurrent)/((mucurrent1*deltaX*(aAvg)) + 1e-15);
+                double udiv = mucurrent / mucurrent1;
+
+                double ldiv =  muprev / mucurrent1;
+                if (ldiv > 1) {
+                    ldiv = 1.0/ldiv;
                 }
-                if (currentTimeStep < 326 && currentTimeStep > 320) {
+                (*U)[i] = (deltaT*c*c*udiv)/((deltaX*(aAvg)) );
+              //  if (currentTimeStep < 326 && currentTimeStep > 320) {
                   //  printf("%lf\t%lf\t%lf\n",mucurrent1,mucurrent,muprev);
-                }
-                (*L)[i] = -(deltaT*c*c*muprev)/((deltaX*(aAvg)*mucurrent1) + 1e-15);
+              //  }
+                //(*L)[i] = -(deltaT*c*c*muprev)/((deltaX*(aAvg)*mucurrent1) + 1e-15);
+                 (*L)[i] = -(deltaT*c*c*ldiv)/((deltaX*(aAvg)) );
+                // printf("Lower: %lf\t Upper: %lf\n",(*L)[i],(*U)[i]);
                 j++;
+                if (currentTimeStep == 33 || currentTimeStep == 32 || currentTimeStep == 34) {
+                    //printf("Lower: %lf\t Upper: %lf\tmu:%lf\n",(*L)[i],(*U)[i],mucurrent1);
+                } if (mucurrent1 == 1) {
+                    //printf("%d\n",currentTimeStep);
+                }
               }
         }
     }
@@ -546,8 +559,7 @@ void constructLUDP1MUAB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     (*U)[NN-1] = 0.0;
       if (!constOpacity) {
         (*mainD)[0] = 1.0;
-        (*U)[0] = c*calculateMu2(calculateWeffNonAvg
-        (0,currentTimeStep - 1));
+        (*U)[0] = c*calculateMu2(calculateWeff(0,currentTimeStep - 1));
     }
 }
 
@@ -671,27 +683,35 @@ double calculateWeff(int space,int time1) {
     //weff for non-classic, avg
     if (!constOpacity && P1) {
         //avg tempreture
-        tt = pow(Avg2(getT(space-1,time1),getT(space-1,time1)),4);
+        tt = pow(Avg1(getT(space-1,time1),getT(space,time1)),4);
         tt = arad*tt;
 
         //avg energy
-        ee = Avg2(E[space-1][time1],E[space-1][time1]);
+        ee = Avg1(E[space-1][time1],E[space][time1]);
 
         //avg opacity
         opacity = getOpacity(space-1,time1);
         double op1 = getOpacity(space-1,time1);
-        opacity = Avg2(opacity,op1);
+        opacity = Avg1(opacity,op1);
     }   
     if ( !constOpacity && space == 0) {
-            Src = (2.0*getFinc() - c*E[0][time1]/2.0)/c ;
+            Src = (2.0*getFinc() - (c*E[0][time1]/2.0))/c ;
             tt = T[space][time1];
             ee = E[space][time1];
             opacity = getOpacity(space,time1);
         }
-    
-    weff = (opacity * tt + Src ) / (opacity*ee + 1e-15);
-    if (weff != weff) {
-         //printf("From WEFF : %d\t%d\n",space,currentTimeStep);
+    weff = (opacity * tt + Src ) / (opacity*ee + 1e-20);
+    if (/*weff != weff*/ currentTimeStep < 78) {
+         //printf("space: %d\ttime: %d\tT: %15.15lf\n",space,currentTimeStep,tt);
+        // printf("weff: %lf\n",weff);
+    }
+    if (weff < 0) {
+         //printf("space: %d\ttime: %d\tT: %15.15lf\te:%lf\n",space,currentTimeStep,tt,ee);
+         weff = 1e-5;
+    }
+    if (weff < 0.01) {
+     //   printf("opacity: %lf\tenergy:%25.25lf\ttempreture:%25.25lf\n",opacity, ee,tt);
+       // printf("weff:%lf\tspace: %d\ttime: %d\n\n",weff,space,time1);
     }
     return weff;
 }
@@ -715,23 +735,23 @@ double calculateWeffNonAvg(int space,int time1) {
             ee = E[space][time1];
         }
     }
-    
     weff = (opacity * tt + Src ) / (opacity*ee + 1e-15);
+
     return weff;
 }
 
 double calculateKappa(double weff) {
     if (weff < 0.01) {
-        return 1;
+        return 1.0;
     } else if (0.01 <= weff && weff <= 0.45) {
-        double a = exp(-2.0/(weff + 1e-15));
-        double b = (24.0 + 20.0*weff + 3.0*pow(weff,2.0)) / (pow(weff,2.0) + 1e-15);
-        double xyz = (1.0- (4.0*a*(1.0 + a*((4.0 - 2.0*weff)/(weff + 1e-15)) + b*exp(-4.0/(weff + 1e-15)) ) ));
+        double a = exp(-2.0/(weff));
+        double b = (24.0 + 20.0*weff + 3.0*pow(weff,2.0)) / (pow(weff,2.0));
+        double xyz = (1.0- (4.0*a*(1.0 + a*((4.0 - 2.0*weff)/(weff)) + b*exp(-4.0/(weff)) ) ));
         return xyz;
     } else if (0.45 < weff && weff < 1.0) {
-        return (1-weff) * calculateB(weff);
+        return (1.0-weff) * calculateB(weff);
     } else  {
-        return (weff-1)*calculateB(weff);
+        return (weff-1.0) * calculateB(weff);
     }
 }
 
@@ -763,11 +783,11 @@ double calculateMu(int space,int time1) {
     double weff = calculateWeff(space,time1);
     double kappa = calculateKappa(weff);
     if (weff < 0.01) {
-        return 1;
+        return 1.0;
     } else if(0.01 <= weff && weff < 0.999) {
         if (kappa > 0) {
             double a = -weff/(2.0*kappa);
-            double b = a*(log(1-kappa + 1e-15));
+            double b = a*(log(1.0-kappa + 1e-10));
             return b;
         } else {
             return 1;
@@ -777,8 +797,8 @@ double calculateMu(int space,int time1) {
         double b = 2.1228 + 2.4674*weff;
         return log(a/b);
     } else {
-        double a = weff/(2.0*kappa + 1e-20);
-        return a*log(1+kappa);
+        double a = weff/(2.0*kappa + 1e-10);
+        return a*log(1.0+kappa);
     }
 }
 
@@ -789,18 +809,22 @@ double calculateMu2(double weff) {
     } else if(0.01 <= weff && weff < 0.999) {
         if (kappa > 0) {
             double a = -weff/(2.0*kappa);
-            double b = a*(log(1-kappa + 1e-15));
+            if (kappa == 1.0) {
+              //printf("time:%d\n",currentTimeStep);
+            }
+            double b = a*(log(1.0 - kappa + 1e-15));
+            
             return b;
         } else {
-            return 1;
+            return 1.0;
         }
     } else if (0.999<= weff && weff <= 1.001) {
         double a = 8.3548 + 1.5708 + weff;
         double b = 2.1228 + 2.4674*weff;
         return log(a/b);
     } else {
-        double a = weff/(2*kappa + 1e-20);
-        return a*log(1+kappa);
+        double a = weff/(2.0*kappa + 1e-15);
+        return a*log(1.0 + kappa);
     }
 }
 
@@ -813,8 +837,9 @@ double getOpacity(int space,int time1) {
         }
         double v = T[space][time1];
         double t  = pow(v/arad,0.25);
-        if (t < epsilon) {
+        if (t == 0.0) {
             t = epsilon;
+            //printf("hm");
         }
         double a = 1.0/(pow(t/(getTH()),3));
         return a;
@@ -943,7 +968,7 @@ void setUpInitialCondition() {
         for (i = 0; i < X; i++) {
           for ( j = 0; j < N; j++) {
             //double tm = pow(10,-1.25)*5.0*getTH();
-            double tm = pow(10,-1.25)*5.0*getTH();
+            double tm = pow(10,-1.25)*getTH();
               T[i][j] = E[i][j] = arad*pow(tm,4);
           }
         }
@@ -983,7 +1008,6 @@ double getT(int space,int time1) {
 }
 
 double getTH(){
-    //return 1160500.0;
     return 1.0;
 }
 

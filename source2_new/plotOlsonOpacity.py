@@ -211,8 +211,9 @@ suOlsonDiffAsym = []
 #suOlsonDiffMUB,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt")
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
 #suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
-suOlsonP1MUAB,x3 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1MUABData.txt")
-P1AB ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1ABData.txt");
+suOlsonP1MUAB,x3 = SuOlsonMyNumericSolution2("../data/Temp/SuOlsonP1MUABData.txt")
+#wef,x1 = SuOlsonMyNumericSolution("../data/Temp/weff.txt")
+#P1AB ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1ABData.txt");
 #suOlsonDiffNumerit ,x5 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt");
 #transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
@@ -221,7 +222,9 @@ P1AB ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1ABData.txt");
 #suOlsonTransp = GetFromFile("../data/SuOlsonTransportData.txt")
 #line3, = plt.plot(suOlsonTransp[0],suOlsonTransp[TT],'^g',label="Transport");
 line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 muAB");
-line441, = plt.plot(x1[0:3000],P1AB[0][0:3000],'k',label="P1AB")
+
+#line16, = plt.plot(x3[0:2000],wef[0][0:2000],'g',label="weff");
+#line441, = plt.plot(x1[0:3000],P1AB[0][0:3000],'k',label="P1AB")
 #line44, = plt.plot(x4[0:3000],suOlsonP1Numerit[0][0:3000],'r',label="P1")
 
 #line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
@@ -237,8 +240,8 @@ line441, = plt.plot(x1[0:3000],P1AB[0][0:3000],'k',label="P1AB")
 #y = [0,0.001,0.01,0.1,1,3]
 #plt.yscale('log')
 #plt.xscale('log')
-plt.xlim(0,30)
-#plt.ylim(0,4.5)
+plt.xlim(0,20)
+plt.ylim(0,5)
 #plt.axis([0.3,8,0.001,3]);
 #plt.xscale('log')
 #ticks = [0.3,0.5,1,3,4];

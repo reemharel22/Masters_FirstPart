@@ -18,14 +18,11 @@ void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD
         const double m = 1.0f / (mainD[i] - L[i] * U[i - 1]);
         U[i] = U[i] * m;
         (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;
-
     }
     /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
     for (i = N - 2; i >=0 ; i--) {
         (*solve)[i] -= U[i] * (*solve)[i + 1];
-
     }
-
 }
 
 void constructLUD(int N,double (*L)[N],double (*U)[N-1],double (*mainD)[N],double mat[N][N]){
