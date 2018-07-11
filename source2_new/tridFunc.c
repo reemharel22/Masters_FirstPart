@@ -8,20 +8,28 @@ double sigmaS = 0.0;
 double x1 = 0.5 ,t1 = 10;
 static double Z[50][500];
 static double Chi[50][500];
-void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD[N]) {
+void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD[N],double time1) {
     int i;
     U[0] = U[0] / mainD[0];
     (*solve)[0] = (*solve)[0] / mainD[0];
-
+    
     /* loop from 1 to X - 1 inclusive, performing the forward sweep */
     for (i = 1; i < N; i++) {
-        const double m = 1.0f / (mainD[i] - L[i] * U[i - 1]);
+    
+        const double m = 1.0 / (mainD[i] - L[i] * U[i - 1]);
         U[i] = U[i] * m;
         (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;
+
     }
     /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
     for (i = N - 2; i >=0 ; i--) {
+        if ( (*solve)[i] > 0) {
+            printf("\tbefore: %lf\t%lf\tu: %lf", (*solve)[i], (*solve)[i+1],U[i]);
+        }
         (*solve)[i] -= U[i] * (*solve)[i + 1];
+        if ( (*solve)[i] > 0) {
+            printf("\tafter:%lf\n\n", (*solve)[i]);
+        }
     }
 }
 
