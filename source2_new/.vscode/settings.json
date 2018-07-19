@@ -6,7 +6,8 @@
         "nrutil.h": "c",
         "stdlib.h": "c",
         "cmath": "c",
-        "complex": "c"
+        "complex": "c",
+        "string.h": "c"
     },
     "python.linting.pylintEnabled": false
 }

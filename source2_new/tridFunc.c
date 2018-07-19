@@ -4,40 +4,41 @@
 #include <stdlib.h>
 #include "SuOlsonAll.h"
 
-double epsilon1 = 0.00000000000000000000001;
-double sigmaA = 1.0;
-double sigmaS = 0.0;
-double x1 = 0.5 ,t1 = 10;
-static double Z[50][500];
-static double Chi[50][500];
+float epsilon1 = 0.00000000000000000000001;
+float sigmaA = 1.0;
+float sigmaS = 0.0;
+float x1 = 0.5 ,t1 = 10;
+static float Z[50][500];
+static float Chi[50][500];
 
-void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD[N],double r[N]) {
+void solveTriagonal(int N,float(*solve)[N],float L[N],float U[N],float mainD[N],float r[N]) {
     int i;
    // tridag(L,mainD,U,r,*solve,N);
+   float u_star[N],r_star[N];
     for (i = 0; i < N; i ++) {
         if(fabs(mainD[i]) <= (fabs(U[i]) + fabs(L[i]))){
             //printf("Unstable\t i: %d\n",i);
         }
     }
     //return;
-    U[0] = U[0] / mainD[0];
-    (*solve)[0] = r[0] / mainD[0];
+    u_star[0] = U[0] / mainD[0];
+    r_star[0] = r[0] / mainD[0];
     /* loop from 1 to X - 1 inclusive, performing the forward sweep */
    
     for (i = 1; i < N; i++) {
-        const double m = 1.0 / (mainD[i] - L[i] * U[i - 1]);
-        U[i] = U[i] * m;
+        const float m = 1.0 / (mainD[i] - L[i] * u_star[i - 1]);
+        u_star[i] = U[i] * m;
        // (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;
-        (*solve)[i] = (r[i] - (L[i] * (r[i - 1]))) * m;
+        r_star[i] = (r[i] - (L[i] * (r_star[i - 1]))) * m;
     }
     
     /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
-    for (i = N - 2; i >=0 ; i--) {
-        (*solve)[i] -= U[i] * (*solve)[i + 1];
+    for (i = N - 1; i-- >0;) {
+        (*solve)[i] = r_star[i] - U[i] * r[i + 1];
     }
 }
 
-void constructLUD(int N,double (*L)[N],double (*U)[N-1],double (*mainD)[N],double mat[N][N]){
+void constructLUD(int N,float (*L)[N],float (*U)[N-1],float (*mainD)[N],float mat[N][N]){
     int i,j;
     for (i = 0; i < N-1; i++) {
       (*U)[i] = mat[i][i+1];
@@ -51,7 +52,7 @@ void constructLUD(int N,double (*L)[N],double (*U)[N-1],double (*mainD)[N],doubl
     }
 }
 
-void printMatrix(int N,double mat[][N]) {
+void printMatrix(int N,float mat[][N]) {
     int i,j;
     for (i = 0; i < N; i++) {
       for (j = 0; j < N; j++)
@@ -60,14 +61,14 @@ void printMatrix(int N,double mat[][N]) {
     }
 }
 
-void setLambda(int X,int N,double E[][N],double Tm[][N],double (*D)[X],int j) {
+void setLambda(int X,int N,float E[][N],float Tm[][N],float (*D)[X],int j) {
     int i;
-    double weff;
-    double a,b;
-    double R;
-    double Src = 0;
-    double deltaX = getdx();
-    double deltaTT = getdt();
+    float weff;
+    float a,b;
+    float R;
+    float Src = 0;
+    float deltaX = getdx();
+    float deltaTT = getdt();
     //maybe change to Ei-1 and D[0] = 1/3
     for ( i = 0; i < X-1; i++) {
         weff = calculateWeff(i,j);
@@ -78,30 +79,30 @@ void setLambda(int X,int N,double E[][N],double Tm[][N],double (*D)[X],int j) {
     (*D)[X-1] = (*D)[X-2];
 }
 
-void buildDKershaw(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j) {
+void buildDKershaw(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float Tm[X][N],int j) {
     int i;
-    double lambda1;
-    double R;
-    double Src =0;
-    double deltaX = getdx();
-    double deltaTT = getdt();
+    float lambda1;
+    float R;
+    float Src =0;
+    float deltaX = getdx();
+    float deltaTT = getdt();
     setLambda(X,N,E,Tm,D,j);
     for (i = 0; i < X; i++) {
-        double weff = calculateWeff(i,j);
+        float weff = calculateWeff(i,j);
         R = (*D)[i];
         lambda1 = 2.0 / ( 3.0 + sqrt(9.0 + 4.0*pow(R, 2.0) ) );
         (*D)[i] = lambda1 / weff;
     }
 }
 
-void buildDMinerbo(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j) {
+void buildDMinerbo(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float Tm[X][N],int j) {
     int i;
-    double deltaX = getdx();
-    double deltaTT = getdt();
-    double Src;
+    float deltaX = getdx();
+    float deltaTT = getdt();
+    float Src;
     setLambda(X,N,E,Tm,D,j);
     for (i = 0; i < X; i++) {
-        double weff = calculateWeff(i,j);
+        float weff = calculateWeff(i,j);
             if ((*D)[i] <= 0.9) {
                 if ((*D)[i] != 0.0 ) {
                     (*D)[i] = ( 5.0 * ( sqrt(1+0.8*pow((*D)[i],2.0)) - 1.0)) / (6.0* pow((*D)[i],2.0));
@@ -119,14 +120,14 @@ void buildDMinerbo(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],d
     }
 }
 
-void buildDLP(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j) {
+void buildDLP(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float Tm[X][N],int j) {
     int i;
-    double deltaX = getdx();
-    double deltaTT = getdt();
-    double Src;
+    float deltaX = getdx();
+    float deltaTT = getdt();
+    float Src;
     setLambda(X,N,E,Tm,D,j);
     for (i = 0; i < X; i++) {
-        double weff = calculateWeff(i,j);
+        float weff = calculateWeff(i,j);
         if ((*D)[i] != 0) {
             (*D)[i] = (1.0/(*D)[i]) * ( 1.0/tanh((*D)[i]) - (1.0/(*D)[i]) );
         }
@@ -137,11 +138,11 @@ void buildDLP(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double
     }
 }
 
-void buildEta(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],int j) {
+void buildEta(int X,int N,float (*EF)[X], float E[X][N],float F[X+1][N],int j) {
     int i;
     for ( i = 0; i < X; i++) {
-        double a = E[i][j];
-        double b = F[i][j];
+        float a = E[i][j];
+        float b = F[i][j];
         if ( a == 0.0) {
             a = epsilon1;
         }
@@ -155,33 +156,33 @@ void buildEta(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],int j
     }
 }
 
-void buildEFKershaw(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j) {
+void buildEFKershaw(int X,int N,float (*EF)[X], float E[X][N],float F[X+1][N],float Tm[X][N],int j) {
     int i;
     buildEta( X, N,EF,E,F,j);
     for (i = 0; i < X; i++) {
-        double eta = (*EF)[i];
+        float eta = (*EF)[i];
         (*EF)[i] = ((1.0 + 2.0*pow((*EF)[i],2.0))/3.0);
     }
 }
 
-void buildNoEF(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j)  {
+void buildNoEF(int X,int N,float (*EF)[X], float E[X][N],float F[X+1][N],float Tm[X][N],int j)  {
     int i ;
     for ( i = 0; i < X; i++) {
-       (*EF[i]) = (double)1.0/(3.0 );
+       (*EF[i]) = (float)1.0/(3.0 );
     }
 }
 
-void buildEFLP(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j) {
+void buildEFLP(int X,int N,float (*EF)[X], float E[X][N],float F[X+1][N],float Tm[X][N],int j) {
     int i;
     buildEta( X, N,EF,E,F,j);
     if (1 == 2) {
         for (i = 0; i < X; i++) {
-            double eta = (*EF)[i];
+            float eta = (*EF)[i];
             if ((*EF)[i] < epsilon1) {
-                (*EF)[i] = (double)1/3;
+                (*EF)[i] = (float)1/3;
                 continue;
             } else {
-                double zed = getZ((*EF)[i]);
+                float zed = getZ((*EF)[i]);
                 //printf("zed is %f\t eta is %f\n",zed,(*EF)[i]);
                 if (zed == 0) {
                     zed = epsilon1;
@@ -193,28 +194,28 @@ void buildEFLP(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],doub
                 if (fabs((-1.0/zed + 1.0/tanh(zed))) - eta > 0.001) {
                     printf("god damnit\n");
                 }
-                double fff = 3;
+                float fff = 3;
             }
         }
     } else {
         for (i = 0; i < X; i++) {
-            double eta = (*EF)[i];
-            (*EF)[i] = (double) (pow(eta,2.0) + 1.0/3.0 - pow(eta/1.55,2.6));
+            float eta = (*EF)[i];
+            (*EF)[i] = (float) (pow(eta,2.0) + 1.0/3.0 - pow(eta/1.55,2.6));
         }
     }
 }
 
-void buildEFMinerbo(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double Tm[X][N],int j) {
+void buildEFMinerbo(int X,int N,float (*EF)[X], float E[X][N],float F[X+1][N],float Tm[X][N],int j) {
     int i;
     buildEta( X, N,EF,E,F,j);
     if (1 == 1) {
         for (i = 0; i < X; i++) {
-            double eta = (*EF)[i];
+            float eta = (*EF)[i];
             if ((*EF)[i] < epsilon1) {
-                (*EF)[i] = (double)1/3;
+                (*EF)[i] = (float)1/3;
                 continue;
             } else {
-                double zed = getZ((*EF)[i]);
+                float zed = getZ((*EF)[i]);
                 //printf("zed is %f\t eta is %f\n",zed,(*EF)[i]);
                 if (zed == 0) {
                     zed = epsilon1;
@@ -230,32 +231,32 @@ void buildEFMinerbo(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N]
         }
     } else {
         for (i = 0; i < X; i++) {
-            double b = (*EF)[i]/1.55;
-            (*EF)[i] = (double)1/3 + (double)2*pow(b, 2.6);
+            float b = (*EF)[i]/1.55;
+            (*EF)[i] = (float)1/3 + (float)2*pow(b, 2.6);
         }
     }
 }
 
-void buildDDiff(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double T[X][N],int j) {
+void buildDDiff(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float T[X][N],int j) {
     int i;
     for ( i = 0; i < X; i++) {
-        (*D)[i] = (double) 1.0/(3.0*getOpacity(i,j));
+        (*D)[i] = (float) 1.0/(3.0*getOpacity(i,j));
     }
 }
 
-void buildDDiffAsym(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double T[X][N],int j) {
+void buildDDiffAsym(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float T[X][N],int j) {
     int i = 0;
     for (i = 0; i < X; i++) {
-        double weff = calculateWeff(i,j);
+        float weff = calculateWeff(i,j);
         //printf(" %lf ",weff);
         (*D)[i] = 1.0/calculateB(weff);
     }
 }
 
-void buildDDiscDiffAsym(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double T[X][N],int j) {
+void buildDDiscDiffAsym(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float T[X][N],int j) {
     int i = 0;
     for (i = 0; i < X; i++) {
-        double weff = calculateWeffNonAvg(i,j);
+        float weff = calculateWeffNonAvg(i,j);
         (*D)[i] = 1.0/ (calculateB(weff) * getOpacity(i,j) );
         (*D)[i] = (*D)[i] / calculateMu2(weff);
     }
@@ -268,14 +269,14 @@ void BuildZ() {
             if (i == 0 && j == 0) {
                 Z[i][j] = 0;
             } else {
-                double z = j*0.002 + i;
+                float z = j*0.002 + i;
                 Z[i][j] = -1.0/z + 1.0/tanh(z);
             }
         }
     }
 }
 
-double getZ(double eta) {
+float getZ(float eta) {
     int i,j;
     int k = 15;
     int l=0,r=49;
