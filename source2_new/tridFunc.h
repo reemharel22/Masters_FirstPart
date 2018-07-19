@@ -1,7 +1,7 @@
 #ifndef tridFunc_H_
 #define tridFunc_H_
 
-void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD[N],double);
+void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD[N],double[N]);
 void constructLUD(int N,double (*L)[N],double (*U)[N-1],double (*mainD)[N],double mat[N][N]);
 void printMatrix(int N,double mat[][N]);
 void buildEFKershaw(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N],double [X][N],int j);

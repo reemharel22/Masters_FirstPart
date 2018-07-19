@@ -2,7 +2,11 @@
     "files.associations": {
         "stdio.h": "c",
         "math.h": "c",
-        "tridfunc.h": "c"
+        "tridfunc.h": "c",
+        "nrutil.h": "c",
+        "stdlib.h": "c",
+        "cmath": "c",
+        "complex": "c"
     },
     "python.linting.pylintEnabled": false
 }
