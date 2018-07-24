@@ -629,17 +629,17 @@ float calculateWeff(int space,int time1) {
     //weff for non-classic, avg
     if (!constOpacity && P1) {
         //avg tempreture
-        tt = pow(Avg2(getT(space + 1,time1), getT(space,time1)),4);
+        tt = pow(Avg1(getT(space + 1,time1), getT(space,time1)),4);
         tt = arad*tt;
         //avg energy
-        ee = Avg2(E[space+1][time1], E[space][time1]);
+        ee = Avg1(E[space+1][time1], E[space][time1]);
         //avg opacity
         opacity = getOpacity(space + 1,time1);
         float op1 = getOpacity(space,time1);
         opacity = Avg2(opacity, op1);
     }   
     if ( !constOpacity && space == 0) {
-           // Src = (2.0*getFinc() - (c*E[0][time1]/2.0)) /c ;
+            Src = (2.0*getFinc() - (c*E[0][time1]/2.0)) /c ;
         }
 
     weff = (opacity * tt + Src ) / (opacity*ee + 1e-15);
@@ -663,7 +663,7 @@ float calculateWeffNonAvg(int space,int time1) {
     //weff for non-classic, avg
     if (!constOpacity) {
         if (space == 0) {
-          //  Src = (2.0*getFinc() - c*E[0][time1]/2.0)/c;
+            Src = (2.0*getFinc() - c*E[0][time1]/2.0)/c;
         }
     }
     weff = (opacity * tt + Src ) / (opacity * ee + 1e-15);
@@ -727,7 +727,7 @@ float calculateMu(int space,int time1) {
         float b = 2.1228 + 2.4674*weff;
         return log(a/b);
     } else {
-        float a = weff/(2.0*kappa + 1e-20);
+        float a = weff/(2.0*kappa + 1e-15);
         return a*log(1.0+kappa);
     }
 }
@@ -873,9 +873,6 @@ void setUpInitialCondition() {
         Src = getSource(i,currentTimeStep);
         solve[2*i + 1] = Src*deltaT*c;
       }
-      if (!constOpacity) {
-        applyBC();
-      }
     }
     else {//diffusion
       for ( i = 0; i < X; i++) {
@@ -905,6 +902,9 @@ void setUpInitialCondition() {
           }
         }
     }
+    for (i = 0; i < NN; i ++) {
+        solve[i] = E[0][0];
+    }
     for (i = 0; i < X; i++) {
       for ( j = 0; j < N; j++) {
           F[j][i] =  0.0;
@@ -916,6 +916,9 @@ void setUpInitialCondition() {
     for ( i = 0; i < X; i++) {
       A[i] = B[i] = 3.0;
     }
+    if (!constOpacity) {
+      //  applyBC();
+      }
 }
 
 float getCv(int space, int time1) {
@@ -942,7 +945,6 @@ float getFinc(){
 void applyBC() {
   if (!constOpacity) {
     double mu = calculateMu2(calculateWeff(0,currentTimeStep - 1));
-    printf("%lf\n",mu);
     solve[0] += (2.0*getFinc() - c*solve[0]*mu)*(deltaT/deltaX);
   } 
 }
