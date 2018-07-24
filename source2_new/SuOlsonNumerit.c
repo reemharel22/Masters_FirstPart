@@ -4,6 +4,9 @@
 #include <time.h>
 #include <malloc.h>
 #include <omp.h>
+#include "nrutil.h"
+#include "nrutil.c"
+#include "tridag.c"
 #define N 5000
 #define X 5000
 void solveTriagonal(float(*solve)[N],float L[N],float U[N],float mainD[N]);
@@ -15,7 +18,7 @@ void copyToSolution(float(*solve)[N],float mat[N][N],int j);
 float integrateX(float(*U)[N][N],int i,float);
 void sendToFile(float E[N][N],float T[N][N],float,float);
 //void mallocMatrices(float**)
-float Em[X][N],Tm[X][N],matrix[X][X],L[X],U[X],mainD[X],solve[X];
+float Em[X][N],Tm[X][N],mat[X][X],L[X],U[X],mainD[X],solve[X];
 
 int main(void) {
   int c,k,p,h,i=0,j=0;
@@ -55,21 +58,21 @@ int main(void) {
   }
   for ( i = 0; i < X; i++) {
      for ( j = 0; j < N; j++) {
-         matrix[i][j] = 0.0;
+         mat[i][j] = 0.0;
      }
   }
 
   //sets the matrix - Au(x,t) = u(x,t-1)
-  setMatrixForE(&matrix,lambdaE,lambdaT);
+  setMatrixForE(&mat,lambdaE,lambdaT);
   //constructs the upper,lower diagonals.
-  constructLUD(&L,&U,&mainD,matrix);
+  constructLUD(&L,&U,&mainD,mat);
   for (i = 1; i < N; i++) {
     //if we want to change the deltaT need TODO:
     //update lambdaE & lambdaT and call setMatrixforE & constructLUD again
     solveTriagonal(&solve,L,U,mainD);
     //now that we solved u(x,t+1), we will copy it to Em.
     copyFromSolution(solve,&Em,i);
-    constructLUD(&L,&U,&mainD,matrix);
+    constructLUD(&L,&U,&mainD,mat);
     for ( j = 0; j < X; j++) {
       //this is where we calculate the next Temperture !
         Tm[j][i] = ((Tm[j][i-1] / deltaT) + sigma*Em[j][i]) / (sigma + (1.0/deltaT) );
@@ -160,7 +163,7 @@ void sendToFile(float Em[X][N],float Tm[X][N],float deltaX,float deltaT) {
 
 
 void solveTriagonal(float(*solve)[N],float L[N],float U[N],float mainD[N]) {
-    int i;
+    int i,k;
     U[0] = U[0] / mainD[0];
     (*solve)[0] = (*solve)[0] / mainD[0];
 

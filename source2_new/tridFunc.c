@@ -14,16 +14,16 @@ static float Chi[50][500];
 void solveTriagonal(int N,float(*solve)[N],float L[N],float U[N],float mainD[N],float r[N]) {
     int i;
    // tridag(L,mainD,U,r,*solve,N);
-   float u_star[N],r_star[N];
+  /* float u_star[N],r_star[N];
     for (i = 0; i < N; i ++) {
         if(fabs(mainD[i]) <= (fabs(U[i]) + fabs(L[i]))){
             //printf("Unstable\t i: %d\n",i);
         }
     }
+    
     //return;
     u_star[0] = U[0] / mainD[0];
     r_star[0] = r[0] / mainD[0];
-    /* loop from 1 to X - 1 inclusive, performing the forward sweep */
    
     for (i = 1; i < N; i++) {
         const float m = 1.0 / (mainD[i] - L[i] * u_star[i - 1]);
@@ -32,9 +32,28 @@ void solveTriagonal(int N,float(*solve)[N],float L[N],float U[N],float mainD[N],
         r_star[i] = (r[i] - (L[i] * (r_star[i - 1]))) * m;
     }
     
-    /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
     for (i = N - 1; i-- >0;) {
         (*solve)[i] = r_star[i] - U[i] * r[i + 1];
+    }*/
+    for (i = 0; i < N; i ++) {
+        if(fabs(mainD[i]) <= (fabs(U[i]) + fabs(L[i]))){
+            printf("Unstable\t i: %d\n",i);
+        }
+    }
+    U[0] = U[0] / mainD[0];
+    (*solve)[0] = (*solve)[0] / mainD[0];
+    
+    /* loop from 1 to X - 1 inclusive, performing the forward sweep */
+    for (i = 1; i < N; i++) {
+    
+        const double m = 1.0 / (mainD[i] - L[i] * U[i - 1]);
+        U[i] = U[i] * m;
+        (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;
+
+    }
+    /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
+    for (i = N - 2; i >=0 ; i--) {
+        (*solve)[i] -= U[i] * (*solve)[i + 1];
     }
 }
 

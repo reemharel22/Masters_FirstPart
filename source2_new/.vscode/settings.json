@@ -7,7 +7,9 @@
         "stdlib.h": "c",
         "cmath": "c",
         "complex": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "*.tcc": "c",
+        "suolsonall.h": "c"
     },
     "python.linting.pylintEnabled": false
 }
