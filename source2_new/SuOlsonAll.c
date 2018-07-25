@@ -1,3 +1,4 @@
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -328,18 +329,15 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     
     for (k = 0; k < NN; k++) {
         if (k % 2 == 1){
+            double mu = calculateMu(k/2, currentTimeStep-1);
             solve[k] = solve[k] * A[k/2];
-        } else {
-            //solve[k] = solve[k]/ (deltaT*c);
-        }
-        //printf("%15.15lf\n",solve[k]);
+        } 
     }
     for (k = 0; k < NN; k++) {
         a[k + 1] = L[k];
         b[k + 1] = mainD[k];
         si[k + 1] = U[k];
         r[k + 1] = solve[k];
-        //printf("%lf\t%lf\t%lf\n",a[k+1],b[k+1],si[k+1]);
     }
   //  printf("\n");
     //solveTriagonal(NN,&solve,L,U,mainD,currentTimeStep); // solve
@@ -433,46 +431,44 @@ void constructLUDP1AB(float (*L)[NN],float (*U)[NN],float (*mainD)[NN]) {
           (*mainD)[i] = A[j] + opacity*B[j]*deltaT*c;
           j++;
       }
-    }   
+    }
+    for(i = 0; i < NN; i ++) {
+       // printf("%lf\t%lf\t%lf\n",(*L)[i],(*mainD)[i],(*U)[i]);
+    }
+   // printf("\n");
 }
 
 void constructLUDP1MUAB(float (*L)[NN],float (*U)[NN],float (*mainD)[NN]) {
     int i,j = 0;
     constructLUDP1AB(L,U,mainD);
      //(*L)[0] = 0.0;
-    j = 1;
-    for ( i = 1; i < NN; i++) {
+    j = 0;
+    int k = 0;
+    for ( i = 0; i < NN-1; i++) {
         if (i % 2 == 0) {//E
-            ;
+            k++;
         } else {
-              if ( i != 0) {
-                float muprev,mucurrent;
-                float bAvg,muAvg,aAvg;
-
-                //this mu is without omega average
-                muprev = calculateMu2(calculateWeffNonAvg(j , 
-                currentTimeStep - 1));
-                mucurrent = calculateMu2(calculateWeffNonAvg(j + 1, 
-                currentTimeStep - 1));
-                //this mu and A is with omega average
-                float udiv = mucurrent ;
-                float ldiv1 =  muprev;
-                (*U)[i] = (c*udiv)/(deltaX );
-                (*L)[i] = -(c*ldiv1)/(deltaX );
-               // printf("%lf\t%lf\n",(*U)[i],(*L)[i]);
-                float opacityprev = getOpacity(j,currentTimeStep-1);
-                float opacitycurr = getOpacity(j+1,currentTimeStep-1);
-                opacity = getOpacity(j-1  ,currentTimeStep-1);
-                opacity = Avg2(opacitycurr,opacityprev);
-                float mu = calculateMu(j,currentTimeStep -1);
-                (*mainD)[i] = A[j]*mu/(c*deltaT) + mu*opacity*B[j];
-                                j++;
-
-              }
+            float muprev,mucurrent;
+            float bAvg,muAvg,aAvg;
+            //this mu is without omega average
+            muprev = calculateMu2(calculateWeffNonAvg(j , 
+            currentTimeStep - 1));
+            mucurrent = calculateMu2(calculateWeffNonAvg(j, 
+            currentTimeStep - 1));
+            //this mu and A is with omega average
+            float udiv = muprev;
+            float ldiv1 =  mucurrent;
+            (*U)[i] = (c*udiv*c*deltaT)/(deltaX );
+            (*L)[i] = -(c*ldiv1*c*deltaT)/(deltaX);
+            float opacityprev = getOpacity(k-1,currentTimeStep-1);
+            float opacitycurr = getOpacity(k,currentTimeStep-1);
+            opacity = Avg2(opacitycurr,opacityprev);
+            float mu = calculateMu(i/2,currentTimeStep -1);
+            (*mainD)[i] = A[j]*mu + mu*opacity*B[j]*(c*deltaT);
+            j++;
         }
     }
     (*L)[0] = 0.0;
-    (*U)[NN-2] = 0.0;
 }
 
 void constructLUDDiff(float (*L)[NN],float (*U)[NN],float (*mainD)[NN]) {
@@ -634,7 +630,7 @@ float calculateWeff(int space,int time1) {
         //avg energy
         ee = Avg1(E[space+1][time1], E[space][time1]);
         //avg opacity
-        opacity = getOpacity(space + 1,time1);
+        opacity = getOpacity(space ,time1);
         float op1 = getOpacity(space,time1);
         opacity = Avg2(opacity, op1);
     }   
@@ -643,9 +639,9 @@ float calculateWeff(int space,int time1) {
         }
 
     weff = (opacity * tt + Src ) / (opacity*ee + 1e-15);
-    if (weff != weff || ee < 0) {
-       // printf("Failed 1, Time: %15.15lf\tPlace: %lf\tEnergy: %15.15lf\n", currentTimeStep * 0.01,deltaX * space, ee);
-       // exit(0);
+    if (weff != weff) {
+        printf("2. %lf\n",tt);
+        exit(0);
     }
     return weff;
 }
@@ -667,6 +663,10 @@ float calculateWeffNonAvg(int space,int time1) {
         }
     }
     weff = (opacity * tt + Src ) / (opacity * ee + 1e-15);
+    if (weff != weff) {
+        printf("1. %lf\n",tt);
+        exit(0);
+    }
     return weff;
 }
 
@@ -711,6 +711,7 @@ float calculateA(float weff) {
 
 float calculateMu(int space,int time1) {
     float weff = calculateWeff(space,time1);
+    return calculateMu2(weff);
     float kappa = calculateKappa(weff);
     if (weff < 0.01) {
         return 1.0;
