@@ -35,6 +35,7 @@ void constructLUDDiffMUB(float (*L)[NN],float (*U)[NN],float (*mainD)[NN]);
 void CalculateT(int i,float deltaT);
 void ApplyTandSourceP1(int i,float deltaX,float deltaT);
 void ApplyTandSourceDiff(int i,float deltaX,float deltaT);
+inline float getInitValue();
 int checkConverged(int i);
 float calculateMu(int space,int time1);
 float calculateKappa(float);
@@ -329,8 +330,8 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     
     for (k = 0; k < NN; k++) {
         if (k % 2 == 1){
-            double mu = calculateMu(k/2, currentTimeStep-1);
-            solve[k] = solve[k] * A[k/2];
+            float mu = calculateMu(k/2, currentTimeStep-1);
+            solve[k] = solve[k] * A[k/2] * mu;
         } 
     }
     for (k = 0; k < NN; k++) {
@@ -347,13 +348,16 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     tridag(a, b, si, r, ss, NN);
     for (k = 0; k < NN; k++) {
         solve[k] = ss[k + 1];
+        if (solve[k] < 0) {
+          //  solve[k] = -1*solve[k];
+        }
         //printf("%lf\n",solve[k]);
     }
     free(ss);
     //now that we solved u(x,t+1), we will copy it to E.
     (*copySolve)(solve,&E,&F,i); //copy solution
     //note, when we solve the real E(n+1) we need copySolution
-    CalculateT(i,deltaT);//we calculate Tn+1
+    CalculateT(i,deltaT);//we calculate Tn+
     (*ApplyTS)(i,deltaX,deltaT);//we apply to solve Tn+1 and the src for the next step
 
 }
@@ -453,17 +457,18 @@ void constructLUDP1MUAB(float (*L)[NN],float (*U)[NN],float (*mainD)[NN]) {
             //this mu is without omega average
             muprev = calculateMu2(calculateWeffNonAvg(j , 
             currentTimeStep - 1));
-            mucurrent = calculateMu2(calculateWeffNonAvg(j, 
+            mucurrent = calculateMu2(calculateWeffNonAvg(j + 1, 
             currentTimeStep - 1));
             //this mu and A is with omega average
-            float udiv = muprev;
-            float ldiv1 =  mucurrent;
-            (*U)[i] = (c*udiv*c*deltaT)/(deltaX );
+            float udiv = mucurrent;
+            float ldiv1 =  muprev;
+        
+            (*U)[i] = (c*udiv*c*deltaT)/(deltaX);
             (*L)[i] = -(c*ldiv1*c*deltaT)/(deltaX);
             float opacityprev = getOpacity(k-1,currentTimeStep-1);
             float opacitycurr = getOpacity(k,currentTimeStep-1);
             opacity = Avg2(opacitycurr,opacityprev);
-            float mu = calculateMu(i/2,currentTimeStep -1);
+            float mu = calculateMu(j,currentTimeStep -1);
             (*mainD)[i] = A[j]*mu + mu*opacity*B[j]*(c*deltaT);
             j++;
         }
@@ -555,17 +560,28 @@ void CalculateT(int i,float deltaT) {
         float cap = getCv(j,i-1);
         float coeff = (getOpacity(j,i-1) * 4.0  * pow(t,3) * arad)
         / (cap);
-        T[j][i] = ((T[j][i-1]) + deltaT*c*coeff*E[j][i]) / (coeff*c*deltaT + 1.0);
-     }
+        T[j][i] = ((T[j][i-1]) + deltaT*c*coeff*(E[j][i])) / (coeff*c*deltaT + 1.0);
+        if ( currentTimeStep == 80) {
+            printf("%15.15lf\t%15.15lf\t%d\t%15.15lf\n",T[j][i],E[j][i],j,calculateMu(j,i));
+        }
+        if (T[j][i] < 0 ){ 
+            //printf("%15.15lf\t%15.15lf\t%d\n",T[j][i],E[j][i],j);
+
+        }
+    }  
 }
 
 void ApplyTandSourceP1(int i,float deltaX,float deltaT) {
     int j;
     int k = 0;
     float Src;
-    for ( j = 0; j < X + 1  ; j++) {
+    for ( j = 0; j < X  ; j++) {
         Src = getSource(j,i);
         solve[2*j] += getOpacity(j,i)*deltaT*c*T[j][i]+ Src*deltaT*c;
+        if (solve[2*j] != solve[2*j]) {
+            printf("7. Time:%d \tTempreture:%lf\tcoeff:%lf\n",currentTimeStep, T[j][i],getOpacity(j,i));
+            //exit(0);
+        }
     }
     //@@@added this
     if (!constOpacity) {
@@ -625,13 +641,18 @@ float calculateWeff(int space,int time1) {
     //weff for non-classic, avg
     if (!constOpacity && P1) {
         //avg tempreture
-        tt = pow(Avg1(getT(space + 1,time1), getT(space,time1)),4);
+        double t1 = (getT(space + 1, time1));
+        double t2 = getT(space,time1);
+        if (t1 != t1 || t2 != t2){
+            printf("6. Time:%d\tT1: %lf\t T2:%lf\n",space,t1,t2);
+        }
+        tt = pow(Avg2(t1, t2),4);
         tt = arad*tt;
         //avg energy
-        ee = Avg1(E[space+1][time1], E[space][time1]);
+        ee = Avg2(E[space+1][time1], E[space][time1]);
         //avg opacity
         opacity = getOpacity(space ,time1);
-        float op1 = getOpacity(space,time1);
+        float op1 = getOpacity(space ,time1);
         opacity = Avg2(opacity, op1);
     }   
     if ( !constOpacity && space == 0) {
@@ -639,8 +660,8 @@ float calculateWeff(int space,int time1) {
         }
 
     weff = (opacity * tt + Src ) / (opacity*ee + 1e-15);
-    if (weff != weff) {
-        printf("2. %lf\n",tt);
+    if (weff != weff || ee != ee  || opacity != opacity) {
+        printf("2. Time:%d \tTempreture:%lf\tEnergy:%15.15lf\tWeff: %lf\n",currentTimeStep, tt,ee,weff);
         exit(0);
     }
     return weff;
@@ -663,8 +684,8 @@ float calculateWeffNonAvg(int space,int time1) {
         }
     }
     weff = (opacity * tt + Src ) / (opacity * ee + 1e-15);
-    if (weff != weff) {
-        printf("1. %lf\n",tt);
+    if (weff != weff || ee != ee) {
+        printf("1. Time:%d \tTempreture:%lf\n",currentTimeStep, tt);
         exit(0);
     }
     return weff;
@@ -675,8 +696,8 @@ float calculateKappa(float weff) {
         return 1.0;
     } else if (0.01 <= weff && weff <= 0.45) {
         float a = exp(-2.0/(weff));
-        float b = (24.0 + 20.0*weff + 3.0*pow(weff,2.0)) / (pow(weff,2.0) + 1e-15);
-        float xyz = (1.0- (4.0*a*(1.0 + a*((4.0 - 2.0*weff)/(weff + 1e-15)) + b*exp(-4.0/(weff + 1e-15)) ) ));
+        float b = (24.0 + 20.0*weff + 3.0*pow(weff,2.0)) / (pow(weff,2.0) );
+        float xyz = (1.0- (4.0*a*(1.0 + a*((4.0 - 2.0*weff)/(weff)) + b*exp(-4.0/(weff)) ) ));
         return xyz;
     } else if (0.45 < weff && weff < 1.0) {
         return (1.0-weff) * calculateB(weff);
@@ -764,11 +785,15 @@ float getOpacity(int space,int time1) {
         }
         float v = T[space][time1];
         float t  = pow(v/arad,0.25);
-        if (t < epsilon) {
-            t = epsilon;
+        
+        if (v < epsilon || t < epsilon) {
+            t = 0.1;
             //printf("hm");
         }
         float a = 1.0/(pow(t/(getTH()),3));
+        if(currentTimeStep == 854 || a > 1000) {
+          //  printf("%25.25lf\t%lf\n",t,a);
+        }
         return a;
     }
 }
@@ -891,15 +916,16 @@ void setUpInitialCondition() {
     if (constOpacity) {
         for (i = 0; i < X; i++) {
           for ( j = 0; j < N; j++) {
-            //float tm = pow(10,-1.25)*5.0*getTH();
               T[i][j] = E[i][j] = 0;
           }
         }
     } else {
         for (i = 0; i < X + 1; i++) {
           for ( j = 0; j < N; j++) {
-            float tm = pow(10,-1.25)*5*getTH();
-              T[i][j] = E[i][j] = arad*pow(tm,4);
+           // float tm = pow(10,-1.25)*5*getTH();
+             // T[i][j] = E[i][j] = arad*pow(tm,4);
+                T[i][j] = E[i][j] = getInitValue();
+
           }
         }
     }
@@ -908,7 +934,7 @@ void setUpInitialCondition() {
     }
     for (i = 0; i < X; i++) {
       for ( j = 0; j < N; j++) {
-          F[j][i] =  0.0;
+          F[j][i] =  getInitValue();
       }
     }
     for ( i = 0; i < X; i++) {
@@ -945,7 +971,7 @@ float getFinc(){
 
 void applyBC() {
   if (!constOpacity) {
-    double mu = calculateMu2(calculateWeff(0,currentTimeStep - 1));
+    float mu = calculateMu2(calculateWeff(0,currentTimeStep - 1));
     solve[0] += (2.0*getFinc() - c*solve[0]*mu)*(deltaT/deltaX);
   } 
 }
@@ -959,4 +985,8 @@ float Avg2(float xx,float yy) {
         return Avg1(xx,yy);
     }
    return (2.0 * xx * yy)/(xx + yy);
+}
+inline float getInitValue() {
+      float tm = pow(10,-1.25)*5*getTH();
+      return arad*pow(tm,4);
 }
