@@ -9,7 +9,7 @@ import time
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 3
+t0 = 10
 def SuOlsonMyNumericSolution(fname):
     k = 0;
     y = []
@@ -177,7 +177,6 @@ def SuOlsonMyNumericSolution6(fname):
                     return y,myList[0]
         y.append(myList[ int(t0*10) +2])
         return y,myList[0]
-        
 #gets number of Y poitns, scatters them according to the transport X,Y
 def ScatterdY(transportX,points,x1):
     y = []
