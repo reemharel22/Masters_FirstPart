@@ -61,16 +61,31 @@ float eps = 1.0;
 float opacity;
 float B[X+1];
 float c = 3E10;
+// 50 mg/cm^3
+float rhoSilicon = 50;
+//convert it to g/cm^3
+float rho = 0.5;
+float
 //float c = 1;
 float arad = 7.56E-15;
 float P1 = 0;
 float Cv = 0;
-float alpha = 1.0;
+//-silicon is 3.53
+float alpha = 3.53;
+float beta = 1.1;
+float musio = 0.09;
+float s_lambda = 0.75;
+float s_f = 8.78;
+//in g/cm^3
+float s_g = 1.0/9175.0;
+//float alpha = 1.0;
 int Classic = 0;
 //float A = 3,B = 3;
 float lambdaT;
 float previousWeff = 0;
-float deltaX = 0.01;
+//in cm
+float deltaX = 0.001;
+//in nano
 float deltaT = 0.01;
 float TH = 1.0;
 int constOpacity = 0;
@@ -329,8 +344,8 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     
     for (k = 0; k < NN; k++) {
         if (k % 2 == 1){
-            float mu = calculateMu(k /2, currentTimeStep-1);
-            solve[k] = solve[k] * A[k/2] ;
+        //    float mu = calculateMu(k /2, currentTimeStep-1);
+          //  solve[k] = solve[k] * A[k/2] ;
         } 
     }
     
@@ -811,7 +826,7 @@ float calculateMu2(float weff) {
 float getOpacity(int space,int time1) {
     if (constOpacity) {
         return 1.0;
-    } else {
+    } else if (constOpacity == 0){
         if (space >= X) {
           space = X-1;
         }
@@ -827,6 +842,9 @@ float getOpacity(int space,int time1) {
           //  printf("%25.25lf\t%lf\n",t,a);
         }
         return a;
+    }else {
+        double xx = s_g * pow(getT(space,time), alpha) * pow(rho, -s_lambda);
+        return rho / xx; 
     }
 }
 
@@ -921,7 +939,7 @@ void setUpInitialCondition() {
     deltaT = deltaT/c;
     TH = 1.0;
     t0 = t0;
-    alpha = 4.0*arad/eps;
+    //alpha = 4.0*arad/eps;
     for ( i = 0; i < NN; i++) {
         solve[i] = 0;
     }
@@ -956,7 +974,8 @@ void setUpInitialCondition() {
           for ( j = 0; j < N; j++) {
            // float tm = pow(10,-1.25)*5*getTH();
              // T[i][j] = E[i][j] = arad*pow(tm,4);
-                T[i][j] = E[i][j] = getInitValue();
+                T[i][j] = 190ev;
+                E[i][j] = getInitValue();
 
           }
         }
@@ -1020,6 +1039,11 @@ float Avg2(float xx,float yy) {
    return (2.0 * xx * yy)/(xx + yy);
 }
 inline float getInitValue() {
+    if (constOpacity == -1) {
+        //todo ev...
+        return arad * pow(190,4)
+    } else {
       float tm = pow(10,-1.25)*5*getTH();
       return arad*pow(tm,4);
+      }
 }
