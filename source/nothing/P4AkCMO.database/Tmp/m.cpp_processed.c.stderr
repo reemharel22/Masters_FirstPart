@@ -1,0 +1,22 @@
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:322: Rule t_LBRACE redefined. Previously defined on line 243
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:332: Rule t_RBRACE redefined. Previously defined on line 253
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:340: Rule t_comment redefined. Previously defined on line 264
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:344: Rule t_string redefined. Previously defined on line 268
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:347: Rule t_char redefined. Previously defined on line 271
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:356: Rule t_include redefined. Previously defined on line 282
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:362: Rule t_error redefined. Previously defined on line 285
+ERROR: /home/reemha/Desktop/par4all/bin/p4a_recover_includes:371: Rule t_ignore redefined. Previously defined on line 294
+Traceback (most recent call last):
+  File "/home/reemha/Desktop/par4all/bin/p4a_recover_includes", line 1054, in <module>
+    main()
+  File "/home/reemha/Desktop/par4all/bin/p4a_recover_includes", line 1040, in main
+    preprocess(options.preprocessor_args)
+  File "/home/reemha/Desktop/par4all/bin/p4a_recover_includes", line 975, in preprocess
+    postpreprocess_simple(output_string)
+  File "/home/reemha/Desktop/par4all/bin/p4a_recover_includes", line 627, in postpreprocess_simple
+    l.build()
+  File "/home/reemha/Desktop/par4all/bin/p4a_recover_includes", line 375, in build
+    self.lexer = lex.lex(module=self, **kwargs)
+  File "/home/reemha/anaconda3/envs/python2.7/lib/python2.7/site-packages/ply/lex.py", line 909, in lex
+    raise SyntaxError("Can't build lexer")
+SyntaxError: Can't build lexer

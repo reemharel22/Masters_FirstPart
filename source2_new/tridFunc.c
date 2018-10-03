@@ -259,7 +259,7 @@ void buildEFMinerbo(int X,int N,float (*EF)[X], float E[X][N],float F[X+1][N],fl
 void buildDDiff(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float T[X][N],int j) {
     int i;
     for ( i = 0; i < X; i++) {
-        (*D)[i] = (float) 1.0/(3.0*getOpacity(i,j));
+        (*D)[i] = (float) 1.0/(3.0*getOpacity(i, j));
     }
 }
 

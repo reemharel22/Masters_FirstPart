@@ -11,13 +11,13 @@
 #include "nrutil.c"
 #include "tridag.c"
 #include "tridFunc.h"
-#define N 2000
-#define X 2000
+#define N 1500
+#define X 1500
 //#define NN (((X*2) + 1))
 //#define NN 3001
 //#define N 10
 //#define X 10
-#define NN (((X*2) + 1))
+#define NN 1500
 //#define NN X
 //#define NN 10
 float epsilon = 1e-20;
@@ -35,6 +35,7 @@ void constructLUDDiffMUB(float (*L)[NN],float (*U)[NN],float (*mainD)[NN]);
 void CalculateT(int i,float deltaT);
 void ApplyTandSourceP1(int i,float deltaX,float deltaT);
 void ApplyTandSourceDiff(int i,float deltaX,float deltaT);
+void findWavefront(int);
 inline float getInitValue();
 int checkConverged(int i);
 float calculateMu(int space,int time1);
@@ -48,11 +49,13 @@ void setUpInitialCondition();
 float getTH();
 float Avg1(float,float);
 float Avg2(float,float);
-void applyBC();
+void applyBC(int);
 int currentTimeStep = 0;
 float F[X][N],T[X + 1][N];
 //@@@CHANGED TO 2*NN +1
-float L[NN],U[NN],mainD[NN],E[X+1][N],EF[X+1],D[X],solve[NN],Weff[X+1][N];
+float L[NN],U[NN],mainD[NN],E[X][N],EF[X],D[X],solve[NN],Weff[X+1][N];
+float waveFront[X];
+float TH[X];
 float a[NN + 1], b[NN + 1], si[NN + 1], r[NN + 1];
 float x0 = 0.5;
 float t0 = 10.0;
@@ -60,12 +63,12 @@ float A[X+1];
 float eps = 1.0;
 float opacity;
 float B[X+1];
+float sigma_boltzman = 5.6704E-5;
 float c = 3E10;
 // 50 mg/cm^3
-float rhoSilicon = 50;
+//float rhoSilicon = 50;
 //convert it to g/cm^3
 float rho = 0.5;
-float
 //float c = 1;
 float arad = 7.56E-15;
 float P1 = 0;
@@ -73,7 +76,7 @@ float Cv = 0;
 //-silicon is 3.53
 float alpha = 3.53;
 float beta = 1.1;
-float musio = 0.09;
+float mu_sio = 0.09;
 float s_lambda = 0.75;
 float s_f = 8.78;
 //in g/cm^3
@@ -85,9 +88,8 @@ float lambdaT;
 float previousWeff = 0;
 //in cm
 float deltaX = 0.001;
-//in nano
-float deltaT = 0.01;
-float TH = 1.0;
+//in seconds
+float deltaT = 0.002E-9;
 int constOpacity = 0;
 
 int main(int argc,char *argv[]) {
@@ -187,13 +189,13 @@ int main(int argc,char *argv[]) {
             if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000) {
                 if (j == 1 || j == 10 || j == 17 || j == 31 || j == 45 || j == 50 || j == 56 || j == 75 || j == 100 || j == 133 || j == 177)
               //if (2*j == 1 || 2*j == 10 || 2*j == 17 || 2*j == 31 || 2*j == 45 || 2*j == 50 || 2*j == 56 || 2*j == 75 || 2*j == 100 || 2*j == 133 || 2*j == 177)
-                if (constOpacity) {
+                if (constOpacity == 1) {
                   printf("%f\t",E[j][i]);
-                }else
-                 printf("%lf\t",pow(T[j][i]/arad,0.25));
+                } else
+                 printf("%lf\t",pow(T[j][i] / arad, 0.25));
                  //
                    // printf("%f\t",pow(E[j][i],0.5));
-            }
+                }
         }
             if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000)
         printf("\n");
@@ -343,27 +345,20 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     (*BuildLUD)(&L,&U,&mainD); // build LUD
     
     for (k = 0; k < NN; k++) {
-        if (k % 2 == 1){
-        //    float mu = calculateMu(k /2, currentTimeStep-1);
-          //  solve[k] = solve[k] * A[k/2] ;
-        } 
-    }
-    
-    for (k = 0; k < NN; k++) {
         a[k + 1] = L[k];
         //printF()
         b[k + 1] = mainD[k];
         si[k + 1] = U[k];
         r[k + 1] = solve[k];
+        if (currentTimeStep == 0)
+            printf("%lf\n",b[k + 1]);
     }
+ 
     float *ss = malloc((NN + 2) * sizeof(float));
 
     tridag(a, b, si, r, ss, NN);
     for (k = 0; k < NN; k++) {
         solve[k] = ss[k + 1];
-        if (solve[k] < 0 ){ 
-            //solve[k] = getInitValue();
-        }
     }
     free(ss);
     //now that we solved u(x,t+1), we will copy it to E.
@@ -371,40 +366,9 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     //note, when we solve the real E(n+1) we need copySolution
     CalculateT(i,deltaT);//we calculate Tn+
    //we apply to solve Tn+1 and the src for the next step  
-         (*ApplyTS)(i,deltaX,deltaT);
+    (*ApplyTS)(i,deltaX,deltaT);
+    findWavefront(i - 1);
     return;
-    /*for ( j = 0; j < NN; j++) {
-        solve[j] = copySolution[j];//copySolution contains E(n),F(n)
-    }
-     (*ApplyTS)(i,deltaX,deltaT);
-    
-    (*f)(X,N,&EF,E,F,T,i);//build EF or FL
-    (*BuildLUD)(&L,&U,&mainD);
-    for (k = 0; k < NN; k++) {
-        if (k % 2 == 1){
-            float mu = calculateMu(k /2, currentTimeStep-1);
-            solve[k] = solve[k] * A[k/2] ;
-        } 
-    }
-    
-    for (k = 0; k < NN; k++) {
-        a[k + 1] = L[k];
-        b[k + 1] = mainD[k];
-        si[k + 1] = U[k];
-        r[k + 1] = solve[k];
-    }
-    ss = malloc((NN + 2) * sizeof(float));
-
-    tridag(a, b, si, r, ss, NN);
-    for (k = 0; k < NN; k++) {
-        solve[k] = ss[k + 1];
-
-    }
-    free(ss);
-
-    (*copySolve)(solve,&E,&F,i); //copy solution
-    CalculateT(i,deltaT);
-    (*ApplyTS)(i,deltaX,deltaT);*/
 
 }
 
@@ -536,18 +500,20 @@ void constructLUDDiff(float (*L)[NN],float (*U)[NN],float (*mainD)[NN]) {
     j = 1;
     for ( i = 1; i < NN; i++) {
         if (i != 0 ) {
-            (*L)[i] = -lambda*c *( (EF[i-1]+EF[i])/2.0);
+            (*L)[i] = -lambda*c *( (EF[i-1] + EF[i])/2.0);
         }
     }
     j = 0;
     for (i = 0; i < NN; i++) {
         opacity = getOpacity(i,currentTimeStep-1);
-        (*mainD)[i] = 1 + deltaT*c*opacity + lambda*c*((EF[i+1]+2*EF[i] + EF[i-1])/(2.0));
+        (*mainD)[i] = 1.0 + deltaT*c*opacity + 
+        lambda*c*((EF[i+1]+2*EF[i] + EF[i-1])/(2.0));
     }
     //@@@ added 2*deltaX
     float bb = 0;
-    if (constOpacity == 0 ) {
-        bb = deltaX;
+    if (constOpacity == -1 ) {
+        bb = deltaX * sigma_boltzman * getOpacity(0, currentTimeStep - 1)/(arad * c);
+    
     }
     (*mainD)[0] = 1 + deltaT*c*getOpacity(0,currentTimeStep-1) + lambda*c*(bb + EF[0] + EF[1])/2.0;
   //  printf("%lf\t",EF[1]);
@@ -607,14 +573,6 @@ void CalculateT(int i,float deltaT) {
         float coeff = (getOpacity(j,i-1) * 4.0  * pow(t,3) * arad)
         / (cap);
         T[j][i] = ((T[j][i-1]) + deltaT*c*coeff*(E[j][i])) / (coeff*c*deltaT + 1.0);
-        if ( currentTimeStep == 365) {
-          //  printf("%15.15lf\t%15.15lf\t%d\t%15.15lf\n",T[j][i],E[j][i],j,calculateMu(j,i));
-           // printf("%15.15lf\t%15.15lf\t%15.15lf\n\n",L[j],U[j],mainD[j]);
-        }
-        if (T[j][i] < 0 ){ 
-           // printf("%15.15lf\t%15.15lf\t%d\n",T[j][i-1],E[j][i],j);
-
-        }
     }  
 }
 
@@ -628,7 +586,7 @@ void ApplyTandSourceP1(int i,float deltaX,float deltaT) {
     }
     //@@@added this
     if (!constOpacity) {
-      applyBC();
+      applyBC(1);
     }
 }
 
@@ -640,9 +598,8 @@ void ApplyTandSourceDiff(int i,float deltaX,float deltaT) {
         Src = getSource(j,i);
         solve[j] += getOpacity(j,i)*deltaT*c*T[j][i]+ Src*c*deltaT;
     }
-    if (!constOpacity) {
-        float l = deltaT / (deltaX*deltaX);
-        solve[0] += (l*2.0*c*deltaX*getFinc())/(c);
+    if (constOpacity != 1) {
+        applyBC(i);
     }
 }
 
@@ -824,7 +781,7 @@ float calculateMu2(float weff) {
 }
 
 float getOpacity(int space,int time1) {
-    if (constOpacity) {
+    if (constOpacity == 1) {
         return 1.0;
     } else if (constOpacity == 0){
         if (space >= X) {
@@ -837,13 +794,10 @@ float getOpacity(int space,int time1) {
             t = 0.1;
             //printf("hm");
         }
-        float a = 1.0/(pow(t/(getTH()),3));
-        if(currentTimeStep == 854 || a > 1000) {
-          //  printf("%25.25lf\t%lf\n",t,a);
-        }
+        float a = 1.0/(pow(t/(getTH(time1)),3));
         return a;
-    }else {
-        double xx = s_g * pow(getT(space,time), alpha) * pow(rho, -s_lambda);
+    } else {
+        float xx = s_g * pow(getT(space,time1), alpha) * pow(rho, -s_lambda);
         return rho / xx; 
     }
 }
@@ -865,6 +819,7 @@ int setUpProgram(int argc,char *argv[]) {
                 i++;
             }
             constOpacity = line[i+2] - '0';
+            constOpacity = -1;
         }
 
         else if (strstr(line,"Diffusion:") != NULL) {
@@ -922,7 +877,7 @@ int setUpProgram(int argc,char *argv[]) {
 
 float getSource(int space,int time1) {
     //we are in a const opacity i.e src is 1
-    if (constOpacity) {
+    if (constOpacity == 1) {
          if (! (space*deltaX >= x0 || time1*c*deltaT >= t0))
         {
             return 1.0;
@@ -936,76 +891,45 @@ float getSource(int space,int time1) {
 void setUpInitialCondition() {
     float Src;
     int i,j;
-    deltaT = deltaT/c;
-    TH = 1.0;
-    t0 = t0;
-    //alpha = 4.0*arad/eps;
     for ( i = 0; i < NN; i++) {
         solve[i] = 0;
     }
 
-    if (P1) {
-      for ( i = 0; i < X + 1; i++) {
-        Src = getSource(i,currentTimeStep);
-        solve[2*i + 1] = Src*deltaT*c;
-      }
-    }
-    else {//diffusion
-      for ( i = 0; i < X; i++) {
-           Src = getSource(i,currentTimeStep);
-          //@@@ add if & else
-          if (i == 0 && constOpacity == 0) {
-            float l = deltaT/(deltaX*deltaX);
-                    solve[0] += (l*2.0*c*deltaX*getFinc())/(c);
-          } else {
-              solve[i] = Src*deltaT*c;
-          }
-    }
-  }
-  //#pragma omp parallel for default(shared)
-    if (constOpacity) {
-        for (i = 0; i < X; i++) {
-          for ( j = 0; j < N; j++) {
-              T[i][j] = E[i][j] = 0;
-          }
-        }
-    } else {
-        for (i = 0; i < X + 1; i++) {
-          for ( j = 0; j < N; j++) {
-           // float tm = pow(10,-1.25)*5*getTH();
-             // T[i][j] = E[i][j] = arad*pow(tm,4);
-                T[i][j] = 190ev;
-                E[i][j] = getInitValue();
-
-          }
-        }
-    }
-    for (i = 0; i < NN; i ++) {
-        solve[i] = E[0][0];
-    }
     for (i = 0; i < X; i++) {
-      for ( j = 0; j < N; j++) {
-          F[j][i] =  getInitValue();
-      }
+        for ( j = 0; j < N; j++) {
+            T[i][j] = 300; // kelvin
+            E[i][j] = s_f * pow(T[i][j], beta) * pow(rho, -0.09);
+          }
     }
+    
     for ( i = 0; i < X; i++) {
         D[i] = EF[i] = (float)1.0/(3.0);
     }
     for ( i = 0; i < X; i++) {
       A[i] = B[i] = 3.0;
     }
-    if (!constOpacity) {
-        currentTimeStep = 1;
-        applyBC();
-      }
+    FILE *fp1;
+    char buff[255];
+    fp1 = fopen("TD_1500_interpolate1.data","r");
+    for ( i = 0; i < X; i++) {
+        fscanf(fp1,"%s",buff);
+        TH[i] = atof(buff);
+    }
+    fclose(fp1);
+    currentTimeStep = 1;
+    applyBC(0);
 }
 
 float getCv(int space, int time1) {
-    if (constOpacity) {
+    if (constOpacity == -1) {
+        float a = beta * s_f * pow(getT(space,time1), beta - 1) * pow(rho,-0.09);
+        return a;
+    }
+    if (constOpacity == 1) {
         float a = getT(space,time1);
         return (alpha*pow(a,3));
     } else {
-        return 4.0*arad*pow(getTH(),3);
+        return 4.0*arad*pow(getTH(time1),3);
     }
 }
 
@@ -1013,19 +937,22 @@ float getT(int space,int time1) {
     return pow(T[space][time1]/arad,0.25);
 }
 
-float getTH(){
-    return 1.0;
+float getTH(time1){
+    return TH[time1] * 11604.505;
 }
 
 float getFinc(){
-    return (c*arad*pow(getTH() * 5,4)/4.0);
+    return (c*arad*pow(getTH(1) * 5,4)/4.0);
 }
 
-void applyBC() {
-  if (!constOpacity) {
+void applyBC(int time1) {
+  if (constOpacity == 0) {
     float mu = calculateMu2(calculateWeff(0,currentTimeStep ));
     solve[0] += (2.0*getFinc() - c*solve[0]*mu)*(deltaT/deltaX);
-  } 
+  } else if (constOpacity == -1) {
+      //maybe currenttimestep - 1...
+      solve[0] += 2.0*pow(getTH(time1), 4)*deltaT*sigma_boltzman*getOpacity(0, time1)/deltaX;
+  }
 }
 
 float Avg1(float xx,float yy) {
@@ -1038,12 +965,38 @@ float Avg2(float xx,float yy) {
     }
    return (2.0 * xx * yy)/(xx + yy);
 }
+
 inline float getInitValue() {
     if (constOpacity == -1) {
-        //todo ev...
-        return arad * pow(190,4)
+        return arad * pow(190*11604.505,4);
     } else {
-      float tm = pow(10,-1.25)*5*getTH();
+      float tm = pow(10,-1.25)*5*getTH(1);
       return arad*pow(tm,4);
       }
+}
+
+void findWavefront(int time1) {
+    int i, j;
+    float maxT = 0;
+    float tol = 1.0 - 0.05;
+    for(i = 0; i < X; i++) {
+        printf("%lf\n",T[i][time1]);
+        if (T[i][time1] > maxT ) {
+            maxT = T[i][time1];
+            
+        }
+    }
+    float front[X];
+    tol = maxT * tol; // tolerance T value of 5% 
+    //tol is the tolerance value..
+    //we find the maximum value of T, but with a tolerance of 5% from the real maximum value.
+    maxT = 0;
+    for(i = 0; i < X; i++) {
+        if (T[i][time1] > maxT && T[i][time1] < tol) {
+            maxT = T[i][time1];
+        }
+    }
+    waveFront[time1] = maxT;
+   // printf("%15.15lf\n",waveFront[time1]);
+    
 }
