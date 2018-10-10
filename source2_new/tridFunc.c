@@ -14,7 +14,7 @@ static float Chi[50][500];
 void solveTriagonal(int N,float(*solve)[N],float L[N],float U[N],float mainD[N],float r[N]) {
     int i;
    // tridag(L,mainD,U,r,*solve,N);
-  /* float u_star[N],r_star[N];
+   /*float u_star[N],r_star[N];
     for (i = 0; i < N; i ++) {
         if(fabs(mainD[i]) <= (fabs(U[i]) + fabs(L[i]))){
             //printf("Unstable\t i: %d\n",i);
@@ -34,12 +34,12 @@ void solveTriagonal(int N,float(*solve)[N],float L[N],float U[N],float mainD[N],
     
     for (i = N - 1; i-- >0;) {
         (*solve)[i] = r_star[i] - U[i] * r[i + 1];
-    }*/
+    }
     for (i = 0; i < N; i ++) {
         if(fabs(mainD[i]) <= (fabs(U[i]) + fabs(L[i]))){
             printf("Unstable\t i: %d\n",i);
         }
-    }
+    }*/
     U[0] = U[0] / mainD[0];
     (*solve)[0] = (*solve)[0] / mainD[0];
     
@@ -259,7 +259,7 @@ void buildEFMinerbo(int X,int N,float (*EF)[X], float E[X][N],float F[X+1][N],fl
 void buildDDiff(int X,int N,float (*D)[X], float E[X][N],float F[X+1][N],float T[X][N],int j) {
     int i;
     for ( i = 0; i < X; i++) {
-        (*D)[i] = (float) 1.0/(3.0*getOpacity(i, j));
+        (*D)[i] = (float) 1.0/(3.0 * getOpacity(i, j));
     }
 }
 
