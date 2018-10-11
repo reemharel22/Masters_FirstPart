@@ -10,6 +10,30 @@ import time
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
 t0 = 1
+def WaveFront(fname):
+    f = open(fname,"r")
+    x1 = f.readline()
+    t1 = []
+    tt = f.readline().split()
+    t1.append([float(x) for x in tt])
+    data = f.readline()
+    n_str = data.split()
+    List = []
+    List.append([float(x) for x in n_str])
+
+    data = f.readline()
+    n_str = data.split()
+    a1 = []
+    a1.append([float(x) for x in n_str])
+    
+
+    data = f.readline()
+    n_str = data.split()
+    flux = []
+    flux.append([float(x) for x in n_str])
+    
+    return x1, t1, List, a1 ,flux
+
 def SuOlsonMyNumericSolution(fname):
     k = 0
     y = []
@@ -193,6 +217,10 @@ p1An1alytic = []
 suOlsonP1MUAB = []
 suOlsonDiffMUB = []
 suOlsonDiffAsym = []
+suOlsonWF = []
+flux = []
+a1 = []
+x1,t1,suOlsonWF, a1, flux = WaveFront("../data/Temp/Back_1500_WaveFront.txt")
 #p1Analytic = GetFromFile("../data/P1AnalyticData.txt")
 #EFM,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonEddingtonFactorMinerbo.txt");
 #EFM2,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo2.txt");
@@ -202,6 +230,20 @@ suOlsonDiffAsym = []
 #p1Analytic,x1 = SuOlsonMyNumericSolution3("../data/Temp/Diff_TH5_DT001.txt")
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution2("../data/Temp/Diff_TH5_DT005.txt")
 #t0 = 20;
+#f = open("dataset.csv","r")
+#f1 = open("dataset1.csv","w+")
+#data1 = f.readlines()
+#f.close()
+#f = open("dataset.csv","r")
+#X = []
+#for i in range(len(data1)):
+#    data = f.readline()
+#    x = float(data.split(',')[0])
+#    y = float(data.split(',')[1])
+#    X.append(str(x) + "\n" + str(y) + "\n")
+#f1.writelines(X)
+#f1.close()
+#f.close()
 #p1Analytic,x2 = SuOlsonMyNumericSolution("../data/Temp/001.txt")
 #t0=30line441, = plt.plot(x1[0:3000],suOlsonDiffMUB[0][0:3000],'k',label="Diffusion dt=0.002")
 #suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution1("../data/Temp/002.txt")
@@ -209,11 +251,12 @@ suOlsonDiffAsym = []
 #suOlsonDiffMUB,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt")
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
 #suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
-suOlsonDiffNumerit,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
+suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/SuOlsonData.txt")
 #suOlsonP1AB,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1ABData.txt")
 #wef,x1 = SuOlsonMyNumericSolution("../data/Temp/weff.txt")
 #P1 ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1Data.txt")
-#suOlsonDiffNumerit ,x5 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt");
+suOlsonDiffNumerit ,x5 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt");
+
 #transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
 #suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
@@ -223,8 +266,17 @@ suOlsonDiffNumerit,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
 #line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 MUAB")
 #line6, = plt.plot(x2[0:3000],suOlsonP1AB[0][0:3000],'r',label="P1 AB")
 #line16, = plt.plot(x3[0:2000],wef[0][0:2000],'g',label="weff");
-#line441, = plt.plot(x1[0:3000],P1AB[0][0:3000],'k',label="P1AB")
-line44, = plt.plot(x1[0:3000], suOlsonDiffNumerit[0][0:3000],'b',label="Diffusion")
+line441, = plt.plot(x1[0:1500],suOlsonDiffAsym[0][0:1500],'k',label="P1AB")
+line441, = plt.plot(x5[0:1500],suOlsonDiffNumerit[0][0:1500],'k',label="P1AB")
+
+#line44, = plt.plot(x5[0:1500], a1[0][0:1500],'r',label="Diffusion")
+#line44, = plt.plot(t1[0][0:1500], flux[0][0:1500],'b',label="Diffusion")
+#line4, = plt.plot(x1[0:1500], flux[0][0:1500],'g',label="Diffusion")
+a2 = [None] * 1500
+for i in range(1500):
+    a2[i] = a1[0][i] + flux[0][i]
+
+#line4, = plt.plot(x1[0:1500], a2,'b',label="Diffusion")
 
 #line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
 #line8, = plt.plot(x1[0:3000],suOlsonDiffMUB[0][0:3000],'r',label="Disc Asym Diffusion")
@@ -249,8 +301,8 @@ line44, = plt.plot(x1[0:3000], suOlsonDiffNumerit[0][0:3000],'b',label="Diffusio
 #labels2 = ['0.001','0.01','0.1','1']
 #plt.xticks(ticks,labels);
 #plt.yticks(ticks2,labels2)
-plt.legend(prop={'size': 10})
-plt.title("For t = " + str(t0))
-plt.ylabel('Radation tempreture Density - T(x,t)');
-plt.xlabel('x');
+#plt.legend(prop={'size': 10})
+#plt.title("For t = " + str(t0))
+#plt.ylabel('Radation tempreture Density - T(x,t)');
+#plt.xlabel('x');
 plt.show()
