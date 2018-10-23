@@ -89,10 +89,10 @@ suOlsonDiffAsym = []
 #EFM,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonEddingtonFactorMinerbo.txt");
 #EFM2,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo2.txt");
 suOlsonDiffNumerit,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
-suOlsonP1Numerit,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1Data.txt")
-suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
-suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
-suOlsonP1MUAB,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1MUABData.txt")
+#suOlsonP1Numerit,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1Data.txt")
+#suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
+#suOlsonDiffMUB,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt");
+#suOlsonP1MUAB,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1MUABData.txt")
 #P1AB ,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1ABData.txt");
 transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 #suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonDiffusionAsymptoticData.txt");
@@ -100,13 +100,13 @@ transportX = [0.01,0.1,0.17,0.31,0.45,0.5,0.56,0.75,1.0,1.33,1.77 ]
 #suOlsonTransp = [];
 #suOlsonTransp = GetFromFile("../data/SuOlsonTransportData.txt")
 #line3, = plt.plot(suOlsonTransp[0],suOlsonTransp[TT],'^g',label="Transport");
-line6, = plt.plot(x2[0:500],suOlsonP1MUAB[0][0:500],'k',label="P1 muAB");
-line4, = plt.plot(x1[0:500],suOlsonP1Numerit[0][0:500],'r',label="P1-Numerit")
+#line6, = plt.plot(x2[0:500],suOlsonP1MUAB[0][0:500],'k',label="P1 muAB");
+#line4, = plt.plot(x1[0:500],suOlsonP1Numerit[0][0:500],'r',label="P1-Numerit")
 #line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
 #line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
-line4, = plt.plot(x2[0:500],suOlsonDiffNumerit[0][0:500],'--r',label="Classic Diffusion")
-line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
-line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
+line4, = plt.plot(x2[0:500],suOlsonDiffNumerit[0][0:500],'k',label="Classic Diffusion")
+#line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
+#l#ine8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
 #line5, = plt.plot(x1[0:500],P1AB[0][0:500],'b',label="P1-AB");
 #legend
 x = [0.5,1,2,3,4]

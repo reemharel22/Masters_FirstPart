@@ -534,7 +534,8 @@ void CalculateT(int i,double deltaT) {
         sigmaA = 1.0;
         // sigmaA = getOpacity(j,i-1);
          // printf("%lf\t",E[j][i]);
-        T[j][i] = ((T[j][i-1] / deltaT) + sigmaA*E[j][i]) / (sigmaA + (1.0/deltaT) );
+        //T[j][i] = ((T[j][i-1] / deltaT) + sigmaA*E[j][i]) / (sigmaA + (1.0/deltaT) );
+        T[j][i] = ((T[j][i-1] + deltaT * E[j][i]))/(1.0 + deltaT) ;
       //   printf("%lf\t",T[j][i]);
      }
     // printf("\n");
@@ -847,7 +848,7 @@ void setUpInitialCondition() {
     }
 
     for ( i = 0; i < X; i++) {
-        D[i] = EF[i] = (double)1.0/3.0;
+        D[i] = EF[i] = (double)1.0/(3.0 * getOpacity(i, 0));
     }
     for ( i = 0; i < X; i++) {
       A[i] = B[i] = 3.0;
