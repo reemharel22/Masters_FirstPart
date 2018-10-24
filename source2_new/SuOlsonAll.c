@@ -11,13 +11,13 @@
 #include "nrutil.c"
 #include "tridag.c"
 #include "tridFunc.h"
-#define N 3000
-#define X 3000
+#define N 2000
+#define X 2000
 //#define NN (((X*2) + 1))
 //#define NN 3001
 //#define N 10
 //#define X 10
-#define NN 3001
+#define NN 2000
 //#define NN X
 //#define NN 10
 float epsilon = 1e-20;
@@ -70,7 +70,8 @@ float c = 3E10;
 // 50 mg/cm^3
 //float rhoSilicon = 50;
 //convert it to g/cm^3
-float rho = 0.05;
+//float rho = 0.05;
+float rho = 1.0;
 //float c = 1;
 float arad = 7.56E-15;
 float Cv = 0;
@@ -78,13 +79,16 @@ float P1 = 0;
 //-silicon is 3.53
 //float alpha = 3.53;
 //float beta = 1.1;
-float alpha = 1;
+float alpha = 3.0;
 float beta = 1;
-float mu_sio = 0.09;
+//float mu_sio = 0.09;
+float mu_sio = 1.0;
 float s_lambda = 0.75;
-float s_f = 8.78E13;
+//float s_f = 8.78E13;
+float s_f =  4 * 7.56E-15;
 //in g/cm^3
-float s_g = 1.0/9175.0;
+//float s_g = 1.0/9175.0;
+float s_g = 1.0;
 //float alpha = 1.0;
 int Classic = 0;
 //float A = 3,B = 3;
@@ -93,7 +97,7 @@ float previousWeff = 0;
 //in cm
 float deltaX = 0.01;
 //in seconds
-float deltaT = 0.01;
+float deltaT = 0.001E-9;
 int constOpacity = 0;
 
 int main(int argc,char *argv[]) {
@@ -195,7 +199,7 @@ int main(int argc,char *argv[]) {
               //if (2*j == 1 || 2*j == 10 || 2*j == 17 || 2*j == 31 || 2*j == 45 || 2*j == 50 || 2*j == 56 || 2*j == 75 || 2*j == 100 || 2*j == 133 || 2*j == 177)
                 if (constOpacity == 1) {
                   printf("%f\t",E[j][i]);
-                } else if (constOpacity == 0)
+                } else if (constOpacity != 1)
                  printf("%lf\t",pow(T[j][i] / arad, 0.25));
    
                 }
@@ -203,22 +207,13 @@ int main(int argc,char *argv[]) {
             if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000)
         printf("\n");
     }
-    for ( i = 0; i < N; i++) {
-        for ( j = 0; j < X; j++) {
-            if (deltaX * i ==  0.5) {
-             //   printf("%15.15lf\t",F[i][j]/sigma_boltzman);
-             ;
-             }//printf("%lf\n", currentTimeStep*deltaX);
-        }
-    }
    // printf("\n");
     if (constOpacity == 1) {
         sendToFileE(p);
     }
    else {
-               sendToFileE(p);
-
-       sendToFileT(p);
+        sendToFileE(p);
+        sendToFileT(p);
         sendToFileW(p);
    }
   return 0;
@@ -896,7 +891,7 @@ int setUpProgram(int argc,char *argv[]) {
                 i++;
             }
             constOpacity = line[i+2] - '0';
-            //constOpacity = -1;
+            constOpacity = -1;
         }
 
         else if (strstr(line,"Diffusion:") != NULL) {
@@ -968,11 +963,11 @@ float getSource(int space,int time1) {
 void setUpInitialCondition() {
     float Src;
     int i,j;
-    deltaT = deltaT / c;
+    //deltaT = deltaT / c;
    // s_f = s_f / (pow(1160500, beta));
   //  s_g = s_g / pow(1160500, alpha);
-    s_f = 
-    alpha = 4.0 * arad;
+   // s_f = 
+   // alpha = 4.0 * arad;
     
     for ( i = 0; i < NN; i++) {
         solve[i] = deltaT * c;
@@ -980,10 +975,10 @@ void setUpInitialCondition() {
 
     for (i = 0; i < X; i++) {
         for ( j = 0; j < N; j++) {
-            double tm = pow(10,-1.25) * 5;
+            double tm = pow(10,-1.25) ;
 
-            T[i][j] = pow(300, 4) * arad; // kelvin
-            //E[i][j] = T[i][j] =  arad*pow(tm,4);
+            //T[i][j] = pow(300, 4) * arad; // kelvin
+            E[i][j] = T[i][j] =  arad * pow(tm,4);
           //  E[i][j] = T[i][j];
           }
     }
@@ -991,7 +986,7 @@ void setUpInitialCondition() {
        solve[i] = getOpacity(i, 0) * c * deltaT * T[i][0] + E[i][0];
     }
     for ( i = 0; i < X; i++) {
-        D[i] = EF[i] = (float)1.0/(3.0 *getOpacity(i, 0));
+        D[i] = EF[i] = (float)1.0/(3.0 * getOpacity(i, 0));
        // D[i] = EF[i] = (float)1.0/(3.0 );
     }
     for ( i = 0; i < X; i++) {
@@ -1045,7 +1040,7 @@ float getTH(int time1){
 }
 
 float getFinc(){
-    return (c*arad*pow(getTH(1) *5,4)/4.0);
+    return (c*arad*pow(getTH(1),4)/4.0);
 }
 
 void applyBC(int time1) {
@@ -1058,7 +1053,9 @@ void applyBC(int time1) {
   } else if (constOpacity == -1) {
       //maybe currenttimestep - 1...
      // printf("%15.15lf\t",solve[0]);
+     double l = deltaT / (deltaX*deltaX);
         solve[0] += arad * c * pow(getTH(time1),4) * deltaT/(2.0*deltaX);
+        printf("%10e\n",arad * c * pow(getTH(time1),4) * deltaT/(2.0*deltaX) - (l*2.0*c*deltaX*getFinc())/(c));
     //   solve[0] += getFinc() * deltaT * 2.0/(c * deltaX);
     //  printf("%15.15lf\n",solve[0]);
   } else if (constOpacity == 1) {

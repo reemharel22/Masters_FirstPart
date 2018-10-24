@@ -9,7 +9,7 @@ import time
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 10
+t0 = 3
 def WaveFront(fname):
     f = open(fname,"r")
     x1 = f.readline()
@@ -210,7 +210,7 @@ def ScatterdY(transportX,points,x1):
                 y.append(points[i])
     return y;
 #start of the main
-N = 5001;
+N = 5001
 suOlsonDiffNumerit = []
 suOlsonP1Numerit = []
 p1An1alytic = []
@@ -266,7 +266,7 @@ suOlsonDiffAsym,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
 #line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 MUAB")
 #line6, = plt.plot(x2[0:3000],suOlsonP1AB[0][0:3000],'r',label="P1 AB")
 #line16, = plt.plot(x3[0:2000],wef[0][0:2000],'g',label="weff");
-line441, = plt.plot(x1[0:2500],suOlsonDiffAsym[0][0:2500],'k',label="P1AB")
+line441, = plt.plot(x1[0:1500],suOlsonDiffAsym[0][0:1500],'k',label="P1AB")
 #line441, = plt.plot(x5[0:1500],suOlsonDiffNumerit[0][0:1500],'k',label="P1AB")
 
 #line44, = plt.plot(x5[0:1500], a1[0][0:1500],'r',label="Diffusion")
@@ -295,8 +295,8 @@ line441, = plt.plot(x1[0:2500],suOlsonDiffAsym[0][0:2500],'k',label="P1AB")
 #plt.ylim(0,1)
 #plt.axis([0.3,8,0.001,3]);
 #plt.xscale('log')
-plt.xlim(0,20)
-plt.ylim(0,5)
+plt.xlim(0,3)
+plt.ylim(0,1)
 #ticks = [0.3,0.5,1,3,4];
 #ticks2 = [0.001,0.01,0.1,1]
 #labels = ['0.3','0.5','1','3','4']
