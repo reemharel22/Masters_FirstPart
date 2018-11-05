@@ -274,8 +274,10 @@ suOlsonDiffAsym,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
 #line3, = plt.plot(suOlsonTransp[0],suOlsonTransp[TT],'^g',label="Transport");
 #line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 MUAB")
 #line6, = plt.plot(x2[0:3000],suOlsonP1AB[0][0:3000],'r',label="P1 AB")
-#line16, = plt.plot(x3[0:2000],wef[0][0:2000],'g',label="weff");
-line441, = plt.plot(x1[0][0:1500],suOlsonDiffAsym[0][0:1500],'k',label="P1AB")
+plt.subplot(211)
+line16, = plt.plot(x2[0:2000],suOlsonDiffAsym[0][0:2000],'g',label="weff");
+plt.subplot(212)
+line441, = plt.plot(t1[0][0:2000],suOlsonWF[0][0:2000],'k',label="P1AB")
 #line441, = plt.plot(x5[0:1500],suOlsonDiffNumerit[0][0:1500],'k',label="P1AB")
 
 #line44, = plt.plot(x5[0:1500], a1[0][0:1500],'r',label="Diffusion")

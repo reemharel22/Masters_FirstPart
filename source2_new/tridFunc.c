@@ -17,7 +17,7 @@ void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD
     (*solve)[0] = (*solve)[0] / mainD[0];
 
     /* loop from 1 to X - 1 inclusive, performing the forward sweep */
-    for (i = 1; i < N; i++) {
+    for (i = 1; i < N ; i++) {
         const double m = 1.0 / (mainD[i] - L[i] * U[i - 1]);
         U[i] = U[i] * m;
         (*solve)[i] = ((*solve)[i] - (L[i] * ((*solve)[i - 1]))) * m;

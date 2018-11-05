@@ -1,7 +1,7 @@
 #define NRANSI
 #include "nrutil.h"
 
-void tridag(float a[], float b[], float c[], float r[], float u[],
+void tridag(double a[], double b[], double c[], double r[], double u[],
 	unsigned long n)
 {
 	unsigned long j;
