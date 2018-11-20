@@ -93,12 +93,10 @@ line4 = plt.plot(T[0:iterations - 1]/1e-9, 10 * x_f[0:iterations - 1],'k',label=
 delta_X = 0.001
 for i in range(0, 200):
     x[i] = i * delta_X
-    print (x[i], x_f[k])
     x1 = 1.0 - (x[i] / x_f[k])
-    #print (x1, x_f[k])
+    print (x1, x_f[k])
     THY[i] = TH[k] * x1**(1/(four_alpha - beta))
 
 plt.subplot(212)
-print (x)
 line5 = plt.plot(x[0:iterations - 1] * 10, 100* THY[0:iterations - 1]/HEV,'k',label="P1AB")
 plt.show()

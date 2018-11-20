@@ -9,7 +9,8 @@ import time
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 1
+t0 = 10
+NN = 100
 def WaveFront(fname):
     f = open(fname,"r")
 
@@ -55,10 +56,10 @@ def SuOlsonMyNumericSolution(fname):
             numbers_float = [float(x) for x in numbers_str]
             myList.append(numbers_float)
             i = i + 1;
-            if (i == int(t0*1000) + 3):
-                y.append(myList[ int(t0*1000) +2])
+            if (i == int(t0*NN) + 3):
+                y.append(myList[ int(t0*NN) +2])
                 return y, myList[0]
-    y.append(myList[ int(t0*1000) +2])
+    y.append(myList[ int(t0*NN) +2])
     return y,myList[0]
 
 def SuOlsonMyNumericSolution1(fname):
@@ -237,7 +238,7 @@ x1,t1,suOlsonWF, a1, flux = WaveFront("../data/Temp/Back_1500_WaveFront.txt")
 #suOlsonDiffMUB,x1 =SuOlsonMyNumericSolution1("../data/Temp/Diff_TH5_DT02.txt")
 #suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/Diff_TH5_DT01.txt")
 #p1Analytic,x1 = SuOlsonMyNumericSolution3("../data/Temp/Diff_TH5_DT001.txt")
-suOlsonDiffAsym,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
+suOlsonDiffAsym, x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
 #t0 = 20;
 #f = open("dataset.csv","r")
 #f1 = open("dataset1.csv","w+")
@@ -275,6 +276,8 @@ suOlsonDiffAsym,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
 #line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 MUAB")
 #line6, = plt.plot(x2[0:3000],suOlsonP1AB[0][0:3000],'r',label="P1 AB")
 plt.subplot(211)
+#plt.xlim(0,1)
+
 line16, = plt.plot(x2[0:2000],suOlsonDiffAsym[0][0:2000],'g',label="weff");
 plt.subplot(212)
 line441, = plt.plot(t1[0][0:2000],suOlsonWF[0][0:2000],'k',label="P1AB")
@@ -302,7 +305,6 @@ line441, = plt.plot(t1[0][0:2000],suOlsonWF[0][0:2000],'k',label="P1AB")
 #y = [0,0.001,0.01,0.1,1,3]
 #plt.yscale('log')
 #plt.xscale('log')
-#plt.xlim(0,20)
 #plt.ylim(0,1)
 #plt.axis([0.3,8,0.001,3]);
 #plt.xscale('log')

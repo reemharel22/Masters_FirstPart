@@ -45,7 +45,6 @@ double calculateKappa(double);
 double calculateA(double weff);
 int setUpProgram(int,char*arg[]);
 double getSource(int space,int time1);
-double getCv(int,int);
 double getT(int space,int time1);
 double getT2(int space, int time1);
 void setUpInitialCondition();
@@ -56,7 +55,7 @@ void applyBC(int);
 int currentTimeStep = 0;
 double F[X][N],T[X + 1][N];
 //@@@CHANGED TO 2*NN +1
-double L[NN],U[NN],mainD[NN],E[X][N],EF[X],D[X],solve[2 * NN + 1],Weff[X+1][N];
+double L[NN + 1],U[NN + 1],mainD[NN + 1],E[X][N],EF[X],D[X],solve[2 * NN + 1],Weff[X+1][N];
 double waveFront[X];
 double TH[2][759];
 double a_[NN + 1], b_[NN + 1], si_[NN + 1], r_[NN + 1];
@@ -96,10 +95,10 @@ int Classic = 0;
 double lambdaT;
 double previousWeff = 0;
 //in cm
-double deltaX = 0.0001;
+double deltaX = 0.01;
 //in mm it is 0.001
 //in seconds
-double deltaT = 0.001E-9;
+double deltaT = 0.01;
 int constOpacity = 0;
 
 int main(int argc,char *argv[]) {
@@ -316,17 +315,17 @@ void sendToFileT(int p) {
    fp = fopen("../data/Temp/SuOlsonDiffusionDiscAsymptoticData.txt","w");
   }
     for ( i = 0; i < N; i++) {
-            fprintf(fp, "%10e ",deltaX*(i)*10 );
+            fprintf(fp, "%10e ",deltaX*(i) );
     }
     fprintf(fp, "\n");
     for ( i = 0; i < N; i++) {
-      fprintf(fp, "%10e ",deltaT*1E9*(i) );
+      fprintf(fp, "%10e ",deltaT*c*(i) );
     }
     fprintf(fp, "\n");
     for ( j = 0; j < N; j++) {
       for ( i = 0; i < N; i++) {
-            fprintf(fp,"%f ",(getT(i,j)/11605.0));
-           // fprintf(fp,"%10e ",(getT(i,j)));
+            //fprintf(fp,"%f ",(getT(i,j)/11605.0));
+            fprintf(fp,"%10e ",(getT(i,j)));
       }
       fprintf(fp,"\n");
     }
@@ -344,7 +343,7 @@ void sendToFileW(int p) {
     }
     fprintf(fp, "\n");
     for ( i = 0; i < N; i++) {
-      fprintf(fp, "%10e ",deltaT*1E9*(i) );
+      fprintf(fp, "%10e ",deltaT*c*(i) );
     }
     fprintf(fp, "\n");
     for ( j = 0; j < X; j++) {
@@ -391,8 +390,18 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
         b_[k + 1] = mainD[k];
         si_[k + 1] = U[k];
         r_[k + 1] = solve[k];
+        if (a_[k + 1] != a_[k+1] ||b_[k + 1] != b_[k+1] ||si_[k + 1] != si_[k+1] || r_[k + 1] != r_[k+1]  ) {
+            printf("Bad matrix\n");
+        }
      //   printf("%10e\t%10e\t%10e\t%10e\n", a_[k + 1], b_[k + 1], si_[k + 1],r_[k + 1]);
     }
+      if ( currentTimeStep < 10) {
+        for (k = 0; k < 100; k++) {
+          //  printf("%10e\t%10e\t%10e\t%10e\t%10e\n",L[k],mainD[k],U[k],solve[k],T[k][currentTimeStep-1]);
+        }
+       // printf("\n");
+    }
+
     double *ss = malloc((NN + 2) * sizeof(double));
     tridag(a_, b_, si_, r_, ss, NN);
     for (k = 0; k < NN; k++) {
@@ -402,26 +411,18 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
        // printf("%10e\n",solve[1]);
  //   printf("%10e\t%10e\n",getT(1,currentTimeStep - 1) / 11605,getOpacity(1,currentTimeStep - 1));
  // printf("%10e\n",getOpacity(1,currentTimeStep - 1));
-    if (currentTimeStep == 1000 | currentTimeStep == 9){
-        for (k = 0; k < X; k++){
-           // printf("%10e\t%10e\t%10e\t%10e\n",L[k],mainD[k],U[k],T[k][i - 1]);
-        }
-           // printf("\n");
-
-    }
     //solveTriagonal(X, &solve, L, U, mainD);
     //printf("%10e\n",solve[0]);
     //now that we solved u(x,t+1), we will copy it to E.
     (*copySolve)(solve,&E,&F,i); //copy solution
-    
-
+  
     //note, when we solve the real E(n+1) we need copySolution
     CalculateT(i, deltaT);//we calculate Tn+
    //we apply to solve Tn+1 and the src for the next step  
     ApplyTandSourceDiff(i, deltaX,deltaT);
 
-    findWavefront(i);
-    calculateFlux(i);
+    findWavefront(i - 1);
+    calculateFlux(i - 1);
     
     return;
 
@@ -525,7 +526,7 @@ void constructLUDP1MUAB(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
             
             (*U)[i] = (c*udiv*c*deltaT)/(deltaX);
             (*L)[i] = -(c*ldiv1*c*deltaT)/(deltaX);
-            double opacityprev = getOpacity(k-1,currentTimeStep-1);
+            double opacityprev = getOpacity(k - 1,currentTimeStep-1);
             double opacitycurr = getOpacity(k,currentTimeStep-1);
             opacity = Avg2(opacitycurr,opacityprev);
             double mu = calculateMu(j , currentTimeStep - 1);
@@ -545,9 +546,9 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
    int i,j = 0;
     double opacity;
     double lambda = deltaT/(deltaX*deltaX);
-    for (i = 0; i < NN-1; i++) {
+    for (i = 0; i < NN; i++) {
    //     if (i != X-1) {
-            (*U)[i] = -lambda *c* (EF[i] + EF[i + 1])/2.0;
+            (*U)[i] = -lambda *c* (EF[i + 1] + EF[i])/2.0;
      //   }
     }
 
@@ -555,24 +556,24 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     j = 1;
     for ( i = 1; i < NN; i++) {
         if (i != 0 ) {
-            (*L)[i] = -lambda * c * (EF[i-1]+EF[i])/2.0;
+            (*L)[i] = -lambda * c * (EF[i -1] + EF[i])/2.0;
         }
     }
     j = 0;
     for (i = 0; i < NN; i++) {
-        opacity = getOpacity(i,currentTimeStep-1);
-        (*mainD)[i] = 1 + deltaT*c*opacity + lambda*c*(EF[i+1]+2*EF[i] + EF[i-1])/(2.0);
+        opacity = getOpacity(i, currentTimeStep-1);
+        (*mainD)[i] = 1 + deltaT*c*opacity + lambda*c*(EF[1 + i] + 2*EF[i] + EF[i - 1])/(2.0);
     }
     //@@@ added 2*deltaX
     double bb = 0;
     if (constOpacity != 1 ) {
-     //   bb = deltaX;
+        bb = deltaX;
     }
     (*mainD)[0] = 1.0 + deltaT* c * getOpacity(0,currentTimeStep-1) + lambda*c*(bb + EF[0] + EF[1])/2.0;
     i = NN - 1;
     if (constOpacity == -1){
-        (*mainD)[0] = 1.0;
-        (*U)[0] = 0.0;
+       // (*mainD)[0] = 1.0;
+       // (*U)[0] = 0.0;
     }
    // printf("%lf\t",EF[0] );
     opacity = getOpacity(i,currentTimeStep-1);
@@ -632,14 +633,12 @@ void CalculateT(int i,double deltaT) {
         / (cap);
         //if (coeff != 1.0)
            // coeff = 1.0;
-        T[j][i] = ((T[j][i - 1]) + deltaT*c*coeff*(E[j][i])) /
-                 (coeff*c*deltaT + 1.0);
+           coeff = deltaT*c*coeff;
+        T[j][i] = ((T[j][i - 1]/coeff) + (E[j][i])) /
+                 (1.0 + 1.0/coeff);
         //T[j][i] = ((T[j][i-1] + deltaT * c * E[j][i]))/(1.0 + c*deltaT) ;
 
     }  
-    if (currentTimeStep == stop) {
-      //  exit(1);
-    }
 }
 
 void ApplyTandSourceP1(int i,double deltaX,double deltaT) {
@@ -854,13 +853,12 @@ double getOpacity(int space,int time1) {
         if (space >= X) {
           space = X-1;
         }
-        
         double t = getT(space, time1);
         double a = 1.0/(pow(t, 3.0));
         return a;
     } else {
-        double t_galpha = (pow(rho,s_lambda) * rho
-                          / (s_g * pow(getT(space,time1), alpha)));
+        double t_galpha = (pow(rho, s_lambda + 1) 
+                          / (s_g * pow(getT(space, time1), alpha)));
         //double bbbb = rho / t_galpha; 
         if (t_galpha != t_galpha) {
             printf("bad opacity\n");
@@ -958,12 +956,15 @@ double getSource(int space,int time1) {
 void setUpInitialCondition() {
     double Src;
     int i,j;
-    arad = 4* sigma_boltzman / c;
+    arad = 4.0 * sigma_boltzman / c;
+    deltaT = deltaT / c;
     //deltaT = deltaT / c;
-    //deltaT = deltaT / c;
-   // s_f = s_f / (pow(1160452, beta));
-    s_g = s_g / pow(1160452, alpha);
-   // s_f = 
+    s_f = s_f / (pow(1160452.0, beta));
+    s_g = s_g / pow(1160452.0, alpha);
+    s_f = 4.0 * arad;
+    s_g = 1.0;
+    rho = 1.0;
+    alpha = 3.0;
    // alpha = 4.0 * arad;
     
     for ( i = 0; i < NN; i++) {
@@ -972,18 +973,18 @@ void setUpInitialCondition() {
 
     for (i = 0; i < X; i++) {
         for ( j = 0; j < N; j++) {
-            //double tm = pow(10,-1.25) ;
+            double tm = pow(10,-1.25) ;
 
-            E[i][j] = T[i][j] = pow(300, 4) * arad; // kelvin
-            
+            E[i][j] = T[i][j] = pow(tm, 4) *5 * arad; // kelvin
+            //E[i][j] = T[i][j] = pow(300, 4) * arad; // kelvin
            // E[i][j] = T[i][j] =  arad * pow(tm,4) ;
           //  E[i][j] = T[i][j];
           }
     }
 
-    for ( i = 0; i < X; i++) {
+    for ( i = 0; i < X + 1; i++) {
         D[i] = EF[i] = (double)1.0/(3.0 * getOpacity(i, 0));
-        solve[i] = getOpacity(i, 0) * deltaT* c * T[i][0] + E[i][0];
+        solve[i] = getOpacity(i, 0) * deltaT * c * T[i][0] + E[i][0];
     }
     //solve[0] += deltaT*c*arad/(2.0*deltaX);
     applyBC(0);
@@ -1011,7 +1012,6 @@ double getCv(int space, int time1) {
     if (constOpacity == -1) {
        double abb = beta * s_f * 
         pow(getT(space, time1), beta - 1.0) * pow(rho,-mu_sio);
-       abb = abb / pow(1160452,beta);
         return abb;
     } else if (constOpacity == 1) {
         double abb = getT(space,time1);
@@ -1030,7 +1030,7 @@ double getT2(int space,int time1) {
 }
 
 double getTH(int time1){
-    //return 1.0;
+    return 1.0;
     int i,j;
     return 190.0 * 11604.52;
     double t = time1*deltaT*1E9;
@@ -1057,8 +1057,8 @@ void applyBC(int time1) {
       //maybe currenttimestep - 1...
      // printf("%15.15lf\t",solve[0]);
      
-  //  solve[0] += arad * c * pow(getTH(time1),4) * deltaT/(2.0*deltaX);
-    solve[0] = arad * pow(getTH(time1), 4);
+    solve[0] += arad * c * pow(getTH(time1) *5 ,4) * deltaT/(2.0*deltaX);
+    //solve[0] = arad * pow(getTH(time1), 4);
         
     //   solve[0] += getFinc() * deltaT * 2.0/(c * deltaX);
     //  printf("%15.15lf\n",solve[0]);
@@ -1091,7 +1091,7 @@ void findWavefront(int time1) {
     int i, j;
     double maxT = 0;
     double position;
-    double tol = 1.0 - 0.05;
+    double tol = 1.0 - 0.1;
     for(i = 1; i < X; i++) {
         if (getT(i, time1) > maxT ) {
             maxT = getT(i, time1);
@@ -1111,8 +1111,8 @@ void findWavefront(int time1) {
         }
     }
   // printf("%lf\t%15.15lf\n",position,maxT);
-    if (time1 % 500 == 0){
-        printf("%lf\t%15.15lf\n",position*10,maxT);
+    if (time1 < 200){
+    //    printf("%lf\t%15.15lf\n",position*10,maxT);
     }
     waveFront[time1] = position*10;    
 }
