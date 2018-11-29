@@ -8,6 +8,7 @@ double sigmaS = 0.0;
 double x1 = 0.5 ,t1 = 10;
 static double Z[50][500];
 static double Chi[50][500];
+
 void solveTriagonal(int N,double(*solve)[N],double L[N],double U[N],double mainD[N]) {
     int i;
     U[0] = U[0] / mainD[0];

@@ -9,7 +9,8 @@
         "complex": "c",
         "string.h": "c",
         "*.tcc": "c",
-        "suolsonall.h": "c"
+        "suolsonall.h": "c",
+        "time.h": "c"
     },
     "python.linting.pylintEnabled": false
 }

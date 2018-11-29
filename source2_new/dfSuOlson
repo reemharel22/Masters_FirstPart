@@ -1,0 +1,16 @@
+SuOlson
+Constant Opacity: -1
+Diffusion: 
+x0: 0.5
+t0: 10
+beta: 4
+alpha: 0
+g: 1
+f: 7.56E-15
+mu: 0
+rho: 1
+lambda: 0
+deltaT: 0.01
+deltaX: 0.01
+init: 0.0
+TH: 1

@@ -4,8 +4,8 @@
 #include <omp.h>
 #include <time.h>
 #include <malloc.h>
-#define N 600
-#define X 600
+#define N 2000
+#define X 2000
 #define n (((N*2) + 1))
 void matrixDotVector(double mat[][N],double (*vec)[N][N],int j);
 void printMatrix(double mat[][N]);

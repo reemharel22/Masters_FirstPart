@@ -1017,7 +1017,9 @@ void setUpInitialCondition() {
     //beta = 1.0;
     //alpha = 3.0;
    // alpha = 4.0 * arad;
-
+    for ( i = 0; i < NN; i++) {
+       // solve[i] = deltaT * c;
+    }
 
     for (i = 0; i < X; i++) {
         for ( j = 0; j < N; j++) {

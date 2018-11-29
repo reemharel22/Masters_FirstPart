@@ -30,7 +30,6 @@ int main() {
     double cv[N];
     s_f = s_f / (pow(1160452, beta));
     s_g = s_g / pow(1160452, alpha);
-
     for (i = 0; i < N; i++) {
         T[i] = min_T + (max_T - min_T) * (i + 1) / (N + 1);
         T[i] = 11604.52 * T[i];

@@ -9,7 +9,7 @@ import time
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 30;
+t0 = 10
 def SuOlsonMyNumericSolution(fname):
     k = 0;
     y = []
@@ -125,9 +125,9 @@ suOlsonDiffAsym = []
 #EFM,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonEddingtonFactorMinerbo.txt");
 #EFM2,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo2.txt");
 #suOlsonDiffNumerit,x2 = SuOlsonMyNumericSolution("../data/Temp/diffsuindt1.txt")
-suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1Data.txt")
-p1Analytic,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1OpacityTestHesboni_dx005.txt")
-suOlsonDiffAsym,x3 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1OpacityTest_dx005.txt")
+suOlsonNumerit,x1 = SuOlsonMyNumericSolution("../data/SuOlsonData.txt")
+#p1Analytic,x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1OpacityTestHesboni_dx005.txt")
+#suOlsonDiffAsym,x3 = SuOlsonMyNumericSolution("../data/Temp/.txt")
 #t0 = 20;
 #p1Analytic,x2 = SuOlsonMyNumericSolution("../data/Temp/001.txt")
 #t0=30
@@ -150,13 +150,16 @@ suOlsonDiffAsym,x3 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonP1OpacityTest
 #suOlsonTransp = GetFromFile("../data/SuOlsonTransportData.txt")
 #line3, = plt.plot(suOlsonTransp[0],suOlsonTransp[TT],'^g',label="Transport");
 #line6, = plt.plot(x2[0:500],suOlsonP1MUAB[0][0:500],'k',label="P1 muAB");
-line44, = plt.plot(x1[0:3000],suOlsonP1Numerit[0][0:3000],'g',label="P1")
+suOlsonP1MUAB,x3 = SuOlsonMyNumericSolution("../data/SuOlsonDiffusionAsymptoticData.txt")
+line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'k',label="P1 muAB");
+
+line44, = plt.plot(x1[0:3000],suOlsonNumerit[0][0:3000],'g',label="Diffusion")
 #line441, = plt.plot(x1[0:3000],suOlsonDiffAsym[0][0:3000],'k',label="Diffusion dt=0.005")
 #line7, = plt.plot(x1[0:500],suOlsonDiffAsym[0][0:500],'--b',label="Asym Diffusion")
 #line8, = plt.plot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
 #line4, = plt.plot(x2[0:3000],suOlsonDiffNumerit[0][0:3000],'b',label="Diffusion")
-line411, = plt.plot(x2[0:3000],p1Analytic[0][0:3000],'r',label="P1 Sum hesboni")
-line7, = plt.plot(x3[0:3000],suOlsonDiffAsym[0][0:3000],'b',label="P1 Harmonic")
+#line411, = plt.plot(x2[0:3000],p1Analytic[0][0:3000],'r',label="P1 Sum hesboni")
+#line7, = plt.plot(x3[0:3000],suOlsonDiffAsym[0][0:3000],'b',label="P1 Harmonic")
 #line8, = plt.p30lot(x2[0:500],suOlsonDiffMUB[0][0:500],'--k',label="Disc Asym Diffusion")
 #line5, = plt.plot(x1[0:500],P1AB[0][0:500],'b',label="P1-AB");
 #legend

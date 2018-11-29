@@ -9,7 +9,7 @@ import time
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 10
+t0 = 3.16
 NN = 100
 def WaveFront(fname):
     f = open(fname,"r")
@@ -276,7 +276,7 @@ suOlsonDiffAsym, x2 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonData.txt")
 #line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 MUAB")
 #line6, = plt.plot(x2[0:3000],suOlsonP1AB[0][0:3000],'r',label="P1 AB")
 plt.subplot(211)
-plt.xlim(0,3)
+plt.xlim(0,20)
 line16, = plt.plot(x2[0:2000],suOlsonDiffAsym[0][0:2000],'g',label="weff");
 plt.subplot(212)
 line441, = plt.plot(t1[0][0:2000],suOlsonWF[0][0:2000],'k',label="P1AB")

@@ -165,8 +165,8 @@ int main(int argc,char *argv[]) {
         for ( j = 0; j < X; j++) {
             if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000) {
                 if (j == 1 || j == 10 || j == 17 || j == 31 || j == 45 || j == 50 || j == 56 || j == 75 || j == 100 || j == 133 || j == 177)
-                    printf("%f\t",getT(j,i));
-           //  printf("%f\t",E[j][i]);
+                 //   printf("%f\t",getT(j,i));
+            printf("%f\t",E[j][i]);
            //           printf("%f\t",pow(E[j][i],0.5));
             }
         }
@@ -315,20 +315,37 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     //double copySolution[NN];
     (*f)(X,N,&EF,E,F,T,i-1);//build EF or FL
     (*BuildLUD)(&L,&U,&mainD); // build LUD
+    //printf("%10e\t%10e\t%10e\n",mainD[0], U[0], L[0]);
+    //printf("%10e\t%10e\t%10e\n",mainD[1], U[1], L[1]);
+    //printf("%10e\t%10e\t%10e\n",mainD[2], U[2], L[2]);
+    //printf("%10e\t%10e\t%10e\n",mainD[3], U[3], L[3]);
+    //printf("%10e\t%10e\t%10e\n",mainD[4], U[4], L[4]);
+
+    //printf("%10e\t%10e\t%10e\n",E[currentTimeStep][0], T[currentTimeStep][0], solve[0]);
+  // printf("%10e\t%10e\t%10e\n",E[currentTimeStep][1], T[currentTimeStep][1], solve[1]);
+    //printf("%10e\t%10e\t%10e\n",E[currentTimeStep][2], T[currentTimeStep][2], solve[2]);
+     for (k = 0; k < NN; k++)
+        printf("%10e\t%10e\t%10e\t%10e\n",mainD[k], U[k], L[k],solve[k]);
     solveTriagonal(NN,&solve,L,U,mainD); // solve
+
+  //  printf("%10e\t%10e\t%10e\n",E[currentTimeStep][0], T[currentTimeStep][0], solve[0]);
+  //  printf("%10e\t%10e\t%10e\n",E[currentTimeStep][1], T[currentTimeStep][1], solve[1]);
+  //  printf("%10e\t%10e\t%10e\n",E[currentTimeStep][2], T[currentTimeStep][2], solve[2]);
     //now that we solved u(x,t+1), we will copy it to E.
     (*copySolve)(solve,&E,&F,i); //copy solution
     //note, when we solve the real E(n+1) we need copySolution
     CalculateT(i,deltaT);//we calculate Tn+1
     (*ApplyTS)(i,deltaX,deltaT);//we apply to solve Tn+1 and the src for the next step
-    for ( j = 0; j < X; j ++) {
-       // printf("%10e\n",getT(j, 1));
-       printf("%10e\t%10e\t%10e\t%10e\n",L[j], U[j],mainD[j],solve[j]);
-    }
     
-    if ( currentTimeStep == 1) {
-        exit(1);
-    }
+       // printf("%10e\n",getT(j, 1));
+
+
+    
+
+    if (currentTimeStep == 1)
+    exit(1);
+
+
     //printf("%10e\t%10e\t%10e\n",pow(T[0][1],0.25),pow(T[1][1],0.25),pow(T[2][1],0.25));
     //exit(0);
    /*    times--;
@@ -449,7 +466,6 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
             (*U)[i] = -lambda *c* (EF[i] + EF[i+1])/2.0;
         }
     }
-
     (*L)[0] = 0.0;
     j = 1;
     for ( i = 1; i < NN; i++) {
@@ -860,7 +876,7 @@ void setUpInitialCondition() {
 
     for ( i = 0; i < X; i++) {
         D[i] = EF[i] = (double)1.0/(3.0 * getOpacity(i, 0));
-        solve[i] = getOpacity(i, 0) * deltaT*c*T[i][0] + E[i][0];
+        solve[i] = getOpacity(i, 0) * deltaT*c*T[i][0] + E[i][0] + getSource(i, 0)* deltaT * c;
     }
     solve[0] += deltaT*c*arad/(2.0*deltaX);
     for ( i = 0; i < X; i++) {
