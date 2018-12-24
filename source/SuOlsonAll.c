@@ -327,7 +327,7 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
      for (k = 0; k < NN; k++)
         printf("%10e\t%10e\t%10e\t%10e\n",mainD[k], U[k], L[k],solve[k]);
     solveTriagonal(NN,&solve,L,U,mainD); // solve
-
+    printf("\n\n");
   //  printf("%10e\t%10e\t%10e\n",E[currentTimeStep][0], T[currentTimeStep][0], solve[0]);
   //  printf("%10e\t%10e\t%10e\n",E[currentTimeStep][1], T[currentTimeStep][1], solve[1]);
   //  printf("%10e\t%10e\t%10e\n",E[currentTimeStep][2], T[currentTimeStep][2], solve[2]);
@@ -339,11 +339,12 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     
        // printf("%10e\n",getT(j, 1));
 
+    if (currentTimeStep == 100) exit(1);
 
     
 
-    if (currentTimeStep == 1)
-    exit(1);
+    //if (currentTimeStep == 1)
+    //exit(1);
 
 
     //printf("%10e\t%10e\t%10e\n",pow(T[0][1],0.25),pow(T[1][1],0.25),pow(T[2][1],0.25));
@@ -873,10 +874,13 @@ void setUpInitialCondition() {
           F[i][j] = 0.0;
       }
     }
-
     for ( i = 0; i < X; i++) {
         D[i] = EF[i] = (double)1.0/(3.0 * getOpacity(i, 0));
-        solve[i] = getOpacity(i, 0) * deltaT*c*T[i][0] + E[i][0] + getSource(i, 0)* deltaT * c;
+        Src = 0;
+        if (i * deltaX < x0) {
+            Src = 1;
+        }
+        solve[i] = getOpacity(i, 0) * deltaT*c*T[i][0] + E[i][0] + Src * deltaT * c;
     }
     solve[0] += deltaT*c*arad/(2.0*deltaX);
     for ( i = 0; i < X; i++) {

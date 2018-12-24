@@ -3,8 +3,8 @@ Constant Opacity: -1
 Diffusion: 
 x0: 0
 t0: 0
-beta: 1
-alpha: 3
+beta: 1.0
+alpha: 3.0
 g: 1
 f: 3.024e-14
 mu: 0
@@ -14,3 +14,4 @@ deltaT: 0.01
 deltaX: 0.01
 Temp_0: 0.05623413252
 TH: 5
+dfrac: 0.1

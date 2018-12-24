@@ -233,7 +233,7 @@ void buildEFMinerbo(int X,int N,double (*EF)[X], double E[X][N],double F[X+1][N]
 void buildDDiff(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double T[X][N],int j) {
     int i;
     for ( i = 0; i < X; i++) {
-        (*D)[i] = (double) 1.0/(3.0  *getOpacity(i, j));
+        (*D)[i] = (double) 1.0/(3.0 * getOpacity(i, j));
     }
 }
 
