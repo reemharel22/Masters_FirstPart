@@ -11,7 +11,7 @@ import data_handle as dh
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4
-t0 = 1
+t0 = 0.3
 NN = 1000
 
 N = 5001
@@ -70,7 +70,7 @@ x2 ,suOlsonDiffAsym,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", t0)
 #line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 MUAB")
 #line6, = plt.plot(x2[0:3000],suOlsonP1AB[0][0:3000],'r',label="P1 AB")
 #plt.subplot(211)
-plt.xlim(0,2)
+#plt.xlim(0,2)
 line16, = plt.plot(x2[0:2000],suOlsonDiffAsym[0:2000],'g',label="weff");
 #plt.subplot(212)
 #line441, = plt.plot(t1[0][0:2000],suOlsonWF[0][0:2000],'k',label="P1AB")

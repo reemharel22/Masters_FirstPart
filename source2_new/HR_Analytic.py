@@ -58,7 +58,7 @@ f             = 8.8e13 / ((HEV**beta))
 g             = 1.0 / (9175.0 * (HEV**alpha))
 rho = 50e-3
 mu = 0.1
-print (g)
+
 four_alpha = 4.0 + alpha
 iterations = 190
 epsilon = beta / four_alpha
@@ -74,7 +74,8 @@ eps_1 = 1 - epsilon
 create_file(T,TH)
 H_integ = H2 * T[0]
 k = 0
-exit(1)
+
+
 for i in range(1, iterations):    
     t = T[i]
     delta_t = T[i] - T[i - 1]
@@ -92,13 +93,14 @@ x = np.ndarray([200], np.float64)
 plt.subplot(211)
 line4 = plt.plot(T[0:iterations - 1]/1e-9, 10 * x_f[0:iterations - 1],'k',label="P1AB")
 #from 0 to 0.2cm .... -> let's go for 200 points i.e 0.001cm
-delta_X = 0.001
-for i in range(0, 200):
-    x[i] = i * delta_X
-    x1 = 1.0 - (x[i] / x_f[k])
-    print (x1, x_f[k])
-    THY[i] = TH[k] * x1**(1/(four_alpha - beta))
 
-plt.subplot(212)
-line5 = plt.plot(x[0:iterations - 1] * 10, 100* THY[0:iterations - 1]/HEV,'k',label="P1AB")
+#delta_X = 0.001
+#for i in range(0, 200):
+#    x[i] = i * delta_X
+#    x1 = 1.0 - (x[i] / x_f[k])
+#    print (x1, x_f[k])
+#    THY[i] = TH[k] * x1**(1/(four_alpha - beta))
+
+#plt.subplot(212)
+#line5 = plt.plot(x[0:iterations - 1] * 10, 100* THY[0:iterations - 1]/HEV,'k',label="P1AB")
 plt.show()

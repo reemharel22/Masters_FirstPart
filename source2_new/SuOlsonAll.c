@@ -11,13 +11,13 @@
 #include "nrutil.c"
 #include "tridag.c"
 #include "tridFunc.h"
-#define N 2000
-#define X 2000
+#define N 3000
+#define X 3000
 //#define NN (((X*2) + 1))
 //#define NN 3001
 //#define N 10
 //#define X 10
-#define NN 2000
+#define NN 3000
 //#define NN X
 //#define NN 10
 double epsilon = 1e-20;
@@ -405,10 +405,9 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     int j,k=0,p=0;
     double solve_prev[N + 1];
     //we first do the basis, where we calculate E*,F*
-
+    (*f)(X,N,&EF,E,F,T,i - 1);//build EF or FL
     ApplyTandSourceDiff(i - 1, deltaX, deltaT);
     applyBC(i - 1);
-    (*f)(X,N,&EF,E,F,T,i - 1);//build EF or FL
     (*BuildLUD)(&L,&U,&mainD); // build LUD
     //for (k = 0; k < NN; k++)
   //     printf("%10e\t%10e\t%10e\t%10e\n",mainD[k], U[k], L[k],solve[k]);
@@ -559,7 +558,7 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     double lambda = deltaT/(deltaX*deltaX);
     for (i = 0; i < NN-1; i++) {
         if (i != X-1) {
-            (*U)[i] = -lambda *c* (EF[i] + EF[i+1])/2.0;
+            (*U)[i] = -lambda *c* (EF[i + 1] + EF[i+1])/2.0;
         }
     }
 
@@ -567,7 +566,7 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     j = 1;
     for ( i = 1; i < NN; i++) {
         if (i != 0 ) {
-            (*L)[i] = -lambda * c * (EF[i -1] + EF[i])/2.0;
+            (*L)[i] = -lambda * c * (EF[i -1] + EF[i - 1])/2.0;
         }
     }
     j = 0;
@@ -577,15 +576,16 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     }
     //@@@ added 2*deltaX
     //    double bb = 0;
+    // doesn't work for su olson.
     if (BC == 1) {
         bb = -2*pow(EF[0], 2) / (EF[0] + 0.5*deltaX);// avner bc 1
         bb += 2.0*EF[0]; 
     }
     (*mainD)[0] = 1.0 + deltaT*c*getOpacity(0, currentTimeStep-1) + lambda*c*(bb + EF[0] + EF[1])/2.0;
     i = NN - 1;
-    if (constOpacity == -1){
-        //(*mainD)[0] = 1.0;
-       // (*U)[0] = 0.0;
+    if (BC == 3) {
+        (*mainD)[0] = 1;
+        (*U)[0] = deltaX/(2.0*EF[0]) - 1 ;
     }
    // printf("%lf\t",EF[0] );
     opacity = getOpacity(i,currentTimeStep-1);
@@ -863,7 +863,7 @@ double getOpacity(int space, int time1) {
         double a = 1.0/(pow(t, 3.0));
         return a;
     } else {
-        double t_galpha = (pow(rho, s_lambda + 1) 
+        double t_galpha = (pow(rho, s_lambda + 1.0) 
                           / (s_g * pow(getT(space, time1), alpha)));
         //double bbbb = rho / t_galpha; 
         double t = getT(space, time1);
@@ -1122,17 +1122,8 @@ void applyBC(int time1) {
         //solve[0] += arad * c * pow(getTH(time1) ,4) * deltaT/(2.0*deltaX);
         solve[0] += 2.0*getFinc() * deltaT / deltaX;  // bc avner 2
     } else if ( BC == 3) {
-        // tdo
+        solve[0] = 2.0*getFinc() * deltaX/(c*EF[0]);
     }
-    //printf("%10e\n",T[0][0]);
-//    printf("%10e\n",EF[0]);
-    //printf("%10e\n",solve[0]);
-  // solve[0] += 
-    //solve[0] = arad * pow(getTH(time1), 4);
-    //  double l = deltaT / (deltaX*deltaX);
-    //solve[0] += l*c*arad*deltaX/2.0;  
-    //   solve[0] += getFinc() * deltaT * 2.0/(c * deltaX);
-    //  printf("%15.15lf\n",solve[0]);
   } else if (constOpacity == 1) {
       // solve[0] += getFinc() * deltaT * 2.0/(c * deltaX);
   }
@@ -1226,7 +1217,7 @@ void update_dt() {
         }
     }
    // max_T *= 10;
-    min_T = max_T * 1E-2;
+    min_T = max_T * 10E-2;
 
     for(i = 0; i < X; i++) {
         T1 = getT(i, currentTimeStep - 1);

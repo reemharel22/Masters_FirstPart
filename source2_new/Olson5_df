@@ -15,4 +15,4 @@ deltaX: 0.01
 Temp_0: 0.05623413252
 TH: 5
 dfrac: 0.2
-BC: 1
+BC: 3
