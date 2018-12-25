@@ -58,6 +58,7 @@ f             = 8.8e13 / ((HEV**beta))
 g             = 1.0 / (9175.0 * (HEV**alpha))
 rho = 50e-3
 mu = 0.1
+print (g)
 four_alpha = 4.0 + alpha
 iterations = 190
 epsilon = beta / four_alpha
@@ -73,6 +74,7 @@ eps_1 = 1 - epsilon
 create_file(T,TH)
 H_integ = H2 * T[0]
 k = 0
+exit(1)
 for i in range(1, iterations):    
     t = T[i]
     delta_t = T[i] - T[i - 1]

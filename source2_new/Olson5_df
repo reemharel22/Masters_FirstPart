@@ -14,4 +14,5 @@ deltaT: 0.01
 deltaX: 0.01
 Temp_0: 0.05623413252
 TH: 5
-dfrac: 0.1
+dfrac: 0.2
+BC: 1

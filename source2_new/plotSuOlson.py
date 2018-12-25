@@ -9,7 +9,7 @@ import data_handle as dh
 #### WHAT ABOUT THE OTHER BENCHMARKS ?!?!
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
-t0 = 10
+t0 = 3.16
 
 
 #start of the main
