@@ -11,13 +11,13 @@
 #include "nrutil.c"
 #include "tridag.c"
 #include "tridFunc.h"
-#define N 3000
-#define X 3000
+#define N 3500
+#define X 3500
 //#define NN (((X*2) + 1))
 //#define NN 3001
 //#define N 10
 //#define X 10
-#define NN 3000
+#define NN 3500
 //#define NN X
 //#define NN 10
 double epsilon = 1e-20;
@@ -69,6 +69,7 @@ double a_[NN + 1], b_[NN + 1], si_[NN + 1], r_[NN + 1];
 double x0 = 0.5;
 double t0 = 10.0;
 double A[X+1];
+double sig_factor = 1;
 double eps = 1.0;
 double opacity;
 double B[X+1];
@@ -279,17 +280,22 @@ void sendToFileE(int p) {
   }else if ( p == 12) {
    fp = fopen("../data/SuOlsonDiffusionDiscAsymptoticData.txt","w");
   }
+  double kk = c;
+    if (problem == 2){
+        kk = 1E9;
+    }
     for ( i = 0; i < N; i++) {
             fprintf(fp, "%f ",deltaX*(i) );
     }
     fprintf(fp, "\n");
     for ( i = 0; i < N; i++) {
-      fprintf(fp, "%f ", currentTime[i] * c );
+      fprintf(fp, "%f ", currentTime[i] * kk );
     }
     fprintf(fp, "\n");
     for ( j = 0; j < N; j++) {
       for ( i = 0; i < X; i++) {
-            fprintf(fp,"%f ", (E[i][j]));
+            //fprintf(fp,"%f ",  E[i][j]);
+            fprintf(fp,"%f ",  pow(E[i][j]/arad, 0.25));
       }
       fprintf(fp,"\n");
     }
@@ -405,17 +411,19 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     int j,k=0,p=0;
     double solve_prev[N + 1];
     //we first do the basis, where we calculate E*,F*
-    (*f)(X,N,&EF,E,F,T,i - 1);//build EF or FL
+    //printf("%10e\n",getOpacity(0,i));
+            //printf("CV: %10e\t T: %10e\n",getCv(0, i - 1), getT(0, i - 1) / 1160500);
+
+    (*f)(X,N,&EF,E,F,T,i - 1); //build EF or FL
     ApplyTandSourceDiff(i - 1, deltaX, deltaT);
     applyBC(i - 1);
     (*BuildLUD)(&L,&U,&mainD); // build LUD
-    //for (k = 0; k < NN; k++)
-  //     printf("%10e\t%10e\t%10e\t%10e\n",mainD[k], U[k], L[k],solve[k]);
-  //  printf("\n\n");
     solveTriagonal(NN, &solve, L, U, mainD);
     (*copySolve)(solve,&E,&F,i);
     CalculateT(i, deltaT);
+    //findWavefront(i - 1);
     update_dt();
+    
     //exit(1);
     //if (currentTimeStep == 100) exit(1);
     return;
@@ -430,6 +438,7 @@ void PredictorCorrectorSolution(int times,int i, void(*f)(),void(*BuildLUD)(),vo
     solveTriagonal(NN, &solve, L, U, mainD);
     (*copySolve)(solve,&E,&F,i);
     CalculateT(i, deltaT);
+    
    // findWavefront(i - 1);
     //calculateFlux(i - 1);
     
@@ -558,7 +567,7 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     double lambda = deltaT/(deltaX*deltaX);
     for (i = 0; i < NN-1; i++) {
         if (i != X-1) {
-            (*U)[i] = -lambda *c* (EF[i + 1] + EF[i+1])/2.0;
+            (*U)[i] = -lambda *c* (EF[i + 1] + EF[i])/2.0;
         }
     }
 
@@ -566,12 +575,12 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
     j = 1;
     for ( i = 1; i < NN; i++) {
         if (i != 0 ) {
-            (*L)[i] = -lambda * c * (EF[i -1] + EF[i - 1])/2.0;
+            (*L)[i] = -lambda * c * (EF[i -1] + EF[i])/2.0;
         }
     }
     j = 0;
     for (i = 0; i < NN; i++) {
-        opacity = getOpacity(i, currentTimeStep - 1);
+        opacity = sig_factor * getOpacity(i, currentTimeStep - 1);
         (*mainD)[i] = 1 + deltaT*c*opacity + lambda*c*(EF[1 + i] + 2*EF[i] + EF[i - 1])/(2.0);
     }
     //@@@ added 2*deltaX
@@ -581,14 +590,17 @@ void constructLUDDiff(double (*L)[NN],double (*U)[NN],double (*mainD)[NN]) {
         bb = -2*pow(EF[0], 2) / (EF[0] + 0.5*deltaX);// avner bc 1
         bb += 2.0*EF[0]; 
     }
-    (*mainD)[0] = 1.0 + deltaT*c*getOpacity(0, currentTimeStep-1) + lambda*c*(bb + EF[0] + EF[1])/2.0;
+    (*mainD)[0] = 1.0 + deltaT*c*sig_factor * getOpacity(0, currentTimeStep-1) + lambda*c*(bb + EF[0] + EF[1])/2.0;
     i = NN - 1;
     if (BC == 3) {
         (*mainD)[0] = 1;
         (*U)[0] = deltaX/(2.0*EF[0]) - 1 ;
+    } else if ( BC == 4) {
+        (*mainD)[0] = 1;
+        (*U)[0] = 0;
     }
    // printf("%lf\t",EF[0] );
-    opacity = getOpacity(i,currentTimeStep-1);
+    opacity = sig_factor * getOpacity(i,currentTimeStep-1);
     (*mainD)[NN-1] = 1.0 + deltaT*c*opacity + lambda* c *(EF[i]+2*EF[i] + EF[i-1])/(2.0);
 }
 
@@ -641,11 +653,11 @@ void CalculateT(int i, double deltaT) {
     for ( j = 0; j < X; j++) {
         double t = getT(j, i - 1);
         double cap = getCv(j, i - 1);
-        double coeff = (getOpacity(j, i - 1) * 4.0  * pow(t, 3) * arad)
+        double coeff = (sig_factor * getOpacity(j, i - 1) * 4.0  * pow(t, 3) * arad)
         / (cap);
         //coeff = deltaT*c*coeff;
         T[j][i] = ((T[j][i - 1]) + (coeff*c*deltaT*E[j][i])) /
-                 (1.0 + deltaT*c*coeff);
+                                    (1.0 + deltaT*c*coeff);
     }  
 }
 
@@ -670,7 +682,7 @@ void ApplyTandSourceDiff(int i,double deltaX,double deltaT) {
     double Src;
     for ( j = 0; j < X; j++) {
         Src = getSource(j, i);
-        solve[j] += getOpacity(j, i)*deltaT*c*T[j][i] + Src*c*deltaT;
+        solve[j] += sig_factor * getOpacity(j, i)*deltaT*c*T[j][i] + Src*c*deltaT;
     }
     //applyBC(currentTimeStep - 1);
 }
@@ -865,6 +877,7 @@ double getOpacity(int space, int time1) {
     } else {
         double t_galpha = (pow(rho, s_lambda + 1.0) 
                           / (s_g * pow(getT(space, time1), alpha)));
+                          //printf("%10e\n",t_galpha);
         //double bbbb = rho / t_galpha; 
         double t = getT(space, time1);
         double a = 1.0/(pow(t, 3.0));
@@ -923,6 +936,9 @@ int setUpProgram(int argc,char *argv[]) {
             d_frac = convertLineToDouble(line, len);
         } else if(strstr(line, "BC:") != NULL) {
             BC = convertLineToInt(line, len);
+        }
+        else if(strstr(line, "sig_factor:") != NULL) {
+            sig_factor = convertLineToDouble(line, len);
         }
 
         else if (strstr(line,"Opacity:") != NULL) {
@@ -986,10 +1002,10 @@ int setUpProgram(int argc,char *argv[]) {
         bb = 0;
     } else if (problem == 2) {
       //  deltaT = deltaT/c;
-       deltaT = deltaT * 1E-9; //units
+        deltaT = deltaT * 1E-9; //units
         bb = deltaX;
         s_f = s_f / (pow(1160500.0, beta));
-        s_g = s_g / pow(1160500.0, alpha);
+        s_g = s_g /  pow(1160500.0, alpha);
     } else if (problem == 1) {
         deltaT = deltaT / c;
         s_f = 4.0 * arad;
@@ -1061,8 +1077,8 @@ void setUpInitialCondition() {
 
 double getCv(int space, int time1) {
     if (constOpacity == -1) {
-       double abb = beta * s_f * 
-        pow(getT(space, time1), beta - 1.0) * pow(rho,-mu_sio);
+       double abb = beta * s_f * pow(getT(space, time1), beta - 1.0) * pow(rho,-mu_sio);
+     ///   printf("%10e\n",abb);
         //if (abb != 4.0*arad)
           //  printf("bad cv\t%10e\t%10e\n",s_f, 4.0*arad);
         return abb;
@@ -1123,6 +1139,9 @@ void applyBC(int time1) {
         solve[0] += 2.0*getFinc() * deltaT / deltaX;  // bc avner 2
     } else if ( BC == 3) {
         solve[0] = 2.0*getFinc() * deltaX/(c*EF[0]);
+    } else if ( BC == 4) {
+        solve[0] = arad*pow(getTH(time1), 4)/(1.0);
+        
     }
   } else if (constOpacity == 1) {
       // solve[0] += getFinc() * deltaT * 2.0/(c * deltaX);
@@ -1211,13 +1230,13 @@ void update_dt() {
     //for min_T we need the max_T
     currentTime[currentTimeStep] = currentTime[currentTimeStep - 1] + deltaT;
     for (i = 0; i < X; i++) {
-        T1 = getT(i, currentTimeStep - 1);
+        T1 = getT(i, currentTimeStep);
         if ( T1 > max_T) {
             max_T = T1;
         }
     }
    // max_T *= 10;
-    min_T = max_T * 10E-2;
+    min_T = max_T * 10E-3;
 
     for(i = 0; i < X; i++) {
         T1 = getT(i, currentTimeStep - 1);
@@ -1230,10 +1249,13 @@ void update_dt() {
 
     dt_tag = d_frac * (deltaT) / tmp;
     deltaT = Min(dt_tag, 1.1*deltaT);
-    if (deltaT > 1) {
-        deltaT = 1;
+   // if (deltaT > 1E-11) {
+    //    deltaT = 1E-11;
+    //}
+    printf("dt tag: %10e\tdt: %10e\tt: %10e\tdelta Temp: %10e\n",dt_tag,deltaT, currentTime[currentTimeStep - 1], tmp);
+    if (currentTimeStep == 300) {
+       // exit(1);
     }
-    printf("%10e\t%10e\t%10e\n",dt_tag,deltaT, tmp);
 }
 
 double Min(double xx, double yy) {

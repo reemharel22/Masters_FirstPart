@@ -10,9 +10,10 @@ f: 8.8E13
 mu: 0.09
 rho: 0.05
 lambda: 0.75
-deltaT: 0.001
+deltaT: 0.0001
 deltaX: 0.0002
 Temp_0: 300
 TH: 2204858.8
 dfrac: 0.1
-BC: 2
+BC: 4
+sig_factor: 1

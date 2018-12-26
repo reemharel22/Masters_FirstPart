@@ -1,0 +1,19 @@
+Back
+Constant Opacity: -1
+Diffusion: 
+x0: 0
+t0: 0
+beta: 1.6
+alpha: 1.5
+g: 1.3889E-4
+f: 3.4E13
+mu: 0.14
+rho: 19.32
+lambda: 0.2
+deltaT: 1E-4
+deltaX: 3E-8
+Temp_0: 300
+TH: 2204858.8
+dfrac: 0.1
+BC: 4
+sig_factor: 1
