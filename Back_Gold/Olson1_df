@@ -15,6 +15,7 @@ deltaX: 0.01
 Temp_0: 0.05623413252
 TH: 1
 dfrac: 0.1
-BC: 3
+BC: 2
 sig_factor: 1
-diagnostics: 
+diagnostics: 55
+timefinish: 15

@@ -44,31 +44,51 @@ def WaveFront(fname):
     return x1, t1, List#, a1 ,flux
 
 def extract_data(fname, t0):
+    # x = []
+    # y1 = []
+    # y2 = []
+    # dt = []
+    # i = 0
+    # f = open(fname,"r")
+    # data = f.readlines()
+    # x = convert_to_float(data[0].split())
+    # #dt = convert_to_float(data[1].split())
+    # y = convert_to_float(data[i].split())
+    # found = False
+    # while ( (i + 1) != len(dt) and not found):
+    #     if (dt[i] == t0):
+    #         y1 = convert_to_float(data[i + 2].split())
+    #         y2 = y1
+    #         t = dt[i]
+    #         found = True
+    #     if ( float(dt[i + 1]) > t0 and float(dt[i]) < t0):
+    #         y1 = convert_to_float(data[i + 2].split())
+    #         y2 = convert_to_float(data[i + 3].split())
+    #         t = dt [i]
+
+    #         found = True
+    #     i = i + 1
+    # print ("Found i: ", i + 1)
+    # return x, y1, y2, t
     x = []
-    y1 = []
-    y2 = []
+    y_curr = []
+    y_prev = []
     dt = []
     i = 0
     f = open(fname,"r")
     data = f.readlines()
     x = convert_to_float(data[0].split())
-    dt = convert_to_float(data[1].split())
+    #dt = convert_to_float(data[1].split())
+    i = 1
     found = False
-    while ( (i + 1) != len(dt) and not found):
-        if (dt[i] == t0):
-            y1 = convert_to_float(data[i + 2].split())
-            y2 = y1
-            t = dt[i]
-            found = True
-        if ( float(dt[i + 1]) > t0 and float(dt[i]) < t0):
-            y1 = convert_to_float(data[i + 2].split())
-            y2 = convert_to_float(data[i + 3].split())
-            t = dt [i]
-
+    while ( y_curr != None and not found):
+        y_curr = convert_to_float(data[i].split())
+        y_prev = convert_to_float(data[i - 1].split())
+        if ( float(y_curr[1]) >= t0 and float(y_prev[1]) <= t0):
             found = True
         i = i + 1
-    print ("Found i: ", i + 1)
-    return x, y1, y2, t
+    #print ("Found i: ", i + 1)
+    return x, y_curr[2:], y_prev[2:], y_curr[1], y_prev[1]
 
 def convert_to_float(arr):
     return [float(nm) for nm in arr]

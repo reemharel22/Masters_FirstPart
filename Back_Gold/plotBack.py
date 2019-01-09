@@ -12,7 +12,7 @@ import data_handle as dh
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4
 NN = 1000
-
+t0 = 0.01
 N = 5001
 suOlsonDiffNumerit = []
 suOlsonP1Numerit = []
@@ -36,6 +36,7 @@ tm_two = []
 tm_three = []
 tm_2 = []
 tm_third = []
+
 EV = 11605
 x1,t1,suOlsonWF = dh.WaveFront("../data/Temp/Back_1500_WaveFront.txt")
 #p1Analytic = GetFromFile("../data/P1AnalyticData.txt")
@@ -45,31 +46,34 @@ x1,t1,suOlsonWF = dh.WaveFront("../data/Temp/Back_1500_WaveFront.txt")
 #suOlsonDiffMUB,x1 =SuOlsonMyNumericSolution1("../data/Temp/Diff_TH5_DT02.txt")
 #suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/Diff_TH5_DT01.txt")
 #p1Analytic,x1 = SuOlsonMyNumericSolution3("../data/Temp/Diff_TH5_DT001.txt")
-x2 ,y_half,a1,t = dh.extract_data("../data/SuOlsonData.txt", 0.5)
-#x2 ,y_one,a1,t = dh.extract_data("../data/SuOlsonData.txt", 1)
-#x2 ,y_two,a1,t = dh.extract_data("../data/SuOlsonData.txt", 2)
-#x2 ,y_three,a1,t = dh.extract_data("../data/SuOlsonData.txt", t0)
-x2 ,y_third,a1,t = dh.extract_data("../data/SuOlsonData.txt", 0.25)
-x2 ,y_2,a1,t = dh.extract_data("../data/SuOlsonData.txt", 0.01)
+# x2 ,y_half,a1,t = dh.extract_data("../data/SuOlsonData.txt", 0.5)
+# #x2 ,y_one,a1,t = dh.extract_data("../data/SuOlsonData.txt", 1)
+# #x2 ,y_two,a1,t = dh.extract_data("../data/SuOlsonData.txt", 2)
+# #x2 ,y_three,a1,t = dh.extract_data("../data/SuOlsonData.txt", t0)
+# x2 ,y_third,a1,t = dh.extract_data("../data/SuOlsonData.txt", 0.25)
+# x2 ,y_2,a1,t = dh.extract_data("../data/SuOlsonData.txt", 0.01)
 
-x1 ,tm_half,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 0.5)
-#x1 ,tm_one,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 1)
-#x2 ,tm_two,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 2)
-#x2 ,tm_three,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", t0)
-x1 ,tm_third,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 0.25)
-x1 ,tm_2,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 0.01)
-
+# x1 ,tm_half,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 0.5)
+# #x1 ,tm_one,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 1)
+# #x2 ,tm_two,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 2)
+# #x2 ,tm_three,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", t0)
+# x1 ,tm_third,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 0.25)
+# x1 ,tm_2,a1,t = dh.extract_data("../data/Temp/SuOlsonData.txt", 0.01)
+x1, y1, y2, t1, t2 = dh.extract_data("../data/BackTemp.txt",t0)
+x3, rad_1, rad_2, t1, t2 = dh.extract_data("../data/BackEnergy.txt",t0)
 #plt.xlim(0,2)
 for i in range(0,2000):
-   # x2[i] = x2[i] * 10
-    y_half[i] = y_half[i]/EV
-    #y_one[i] = y_one[i]/EV
-  #  y_two[i] = y_two[i]/EV
-   # y_three[i] = y_three[i]/EV
-    y_2[i] = y_2[i]/EV
-    y_third[i] = y_third[i]/EV
-line16, = plt.plot(t1[0][0:2000], suOlsonWF[0][0:2000])
-line17, = plt.plot(t1,)
+    rad_1[i] = rad_1[i] / EV
+#    # x2[i] = x2[i] * 10
+#     y_half[i] = y_half[i]/EV
+#     #y_one[i] = y_one[i]/EV
+#   #  y_two[i] = y_two[i]/EV
+#    # y_three[i] = y_three[i]/EV
+#     y_2[i] = y_2[i]/EV
+#     y_third[i] = y_third[i]/EV
+line16, = plt.plot(x1[0:2000], y1[0:2000])
+line1, = plt.plot(x1[0:2000], rad_1[0:2000])
+#line17, = plt.plot(t1,)
 #line17, = plt.plot(x2[0:2000],y_one[0:2000],'g',label="TR t0 = 1")
 #line18, = plt.plot(x2[0:2000],y_two[0:2000],label="TR t0 = 2")
 #line19, = plt.plot(x2[0:2000],y_three[0:2000],label="TR t0 = 3")
@@ -100,8 +104,8 @@ line17, = plt.plot(t1,)
 
 #line411, = plt.plot(x1[0:3000],suOlsonDiffAsym[0][0:3000],'r',label="Diffusion dt = 0.005")
 #line7, = plt.plot(x1[0:3000],p1Analytic[0][0:3000],'b',label="Diffusion dt = 0.001")
-#line4, = plt.plot(x5[0:3000],suOlsonDiffNumerit[0][0:3000],'b',label="Diffusion")
 #line8, = plt.plot(x1[0:3000],suOlsonDiffMUB[0][0:3000],'--k',label="Disc Asym Diffusion")
+#line4, = plt.plot(x5[0:3000],suOlsonDiffNumerit[0][0:3000],'b',label="Diffusion")
 #line5, = plt.plot(x1[0:500],P1AB[0][0:500],'b',label="P1-AB");
 #legend
 #x = [0.5,1,2,3,4]
@@ -118,7 +122,7 @@ line17, = plt.plot(t1,)
 #plt.xticks(ticks,labels);
 #plt.yticks(ticks2,labels2)
 #plt.legend(prop={'size': 10})
-#plt.title("For t = " + str(t))
+plt.title("For t = " + str(t1))
 #plt.ylabel('Radation tempreture Density - T(x,t)');
 #plt.xlabel('x');
 plt.show()

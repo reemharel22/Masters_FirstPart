@@ -11,7 +11,7 @@ import data_handle as dh
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 1
+t0 = 10
 #start of the main
 N = 5001
 suOlsonDiffNumerit = []
@@ -23,7 +23,7 @@ suOlsonDiffAsym = []
 suOlsonWF = []
 flux = []
 a1 = []
-x1,t1,suOlsonWF, a1, flux = dh.WaveFront("../data/Temp/Back_1500_WaveFront.txt")
+#x1,t1,suOlsonWF, a1, flux = dh.WaveFront("../data/Temp/Back_1500_WaveFront.txt")
 #p1Analytic = GetFromFile("../data/P1AnalyticData.txt")
 #EFM,x1 = SuOlsonMyNumericSolution("../data/Temp/SuOlsonEddingtonFactorMinerbo.txt");
 #EFM2,x1 = SuOlsonMyNumericSolution("../data/SuOlsonEddingtonFactorMinerbo2.txt");
@@ -31,8 +31,8 @@ x1,t1,suOlsonWF, a1, flux = dh.WaveFront("../data/Temp/Back_1500_WaveFront.txt")
 #suOlsonDiffMUB,x1 =SuOlsonMyNumericSolution1("../data/Temp/Diff_TH5_DT02.txt")
 #suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/Diff_TH5_DT01.txt")
 #p1Analytic,x1 = SuOlsonMyNumericSolution3("../data/Temp/Diff_TH5_DT001.txt")
-x2, suOlsonDiffAsym, a1, t = dh.extract_data("../data/Temp/SuOlsonData.txt", t0)
-x2, y1, a1, t = dh.extract_data("../data/SuOlsonData.txt", t0)
+#x2, suOlsonDiffAsym, a1, t = dh.extract_data("../data/Temp/SuOlsonData.txt", t0)
+x2, y1, y2, t1,t2 = dh.extract_data("../data/OlsonEnergy.txt", t0)
 #t0 = 20;
 #f = open("dataset.csv","r")
 #f1 = open("dataset1.csv","w+")
@@ -70,8 +70,8 @@ x2, y1, a1, t = dh.extract_data("../data/SuOlsonData.txt", t0)
 #line6, = plt.plot(x3[0:3000],suOlsonP1MUAB[0][0:3000],'g',label="P1 MUAB")
 #line6, = plt.plot(x2[0:3000],suOlsonP1AB[0][0:3000],'r',label="P1 AB")
 plt.xlim(0,2)
-line16, = plt.plot(x2,suOlsonDiffAsym,'g',label="weff");
-line16, = plt.plot(x2,y1,'--g',label="weff");
+line16, = plt.plot(x2,y1,'r',label="weff");
+#line16, = plt.plot(x2,y1,'--g',label="weff");
 
 #line441, = plt.plot(x5[0:1500],suOlsonDiffNumerit[0][0:1500],'k',label="P1AB")
 
@@ -107,7 +107,7 @@ line16, = plt.plot(x2,y1,'--g',label="weff");
 #plt.xticks(ticks,labels);
 #plt.yticks(ticks2,labels2)
 #plt.legend(prop={'size': 10})
-plt.title("For t = " + str(t))
+plt.title("For t = " + str(t1))
 #plt.ylabel('Radation tempreture Density - T(x,t)');
 #plt.xlabel('x');
 plt.show()

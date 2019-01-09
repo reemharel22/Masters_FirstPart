@@ -32,8 +32,8 @@ a1 = []
 #suOlsonP1Numerit,x1 = SuOlsonMyNumericSolution("../data/Temp/Diff_TH5_DT01.txt")
 #p1Analytic,x1 = SuOlsonMyNumericSolution3("../data/Temp/Diff_TH5_DT001.txt")
 plt.xlim(0, 2)
-x2 , suOlsonDiffAsym, a1, t = dh.extract_data("../data/SuOlsonData.txt", t0)
-line16, = plt.plot(x2, suOlsonDiffAsym[0:2000],'g',label="weff")
+x2 , y1, y2, t1,t2 = dh.extract_data("../data/SuOlsonData.txt", t0)
+line16, = plt.plot(x2, y1[0:2000],'g',label="weff")
 #legend
 #x = [0.5,1,2,3,4]
 #y = [0,0.001,0.01,0.1,1,3]
@@ -49,7 +49,7 @@ line16, = plt.plot(x2, suOlsonDiffAsym[0:2000],'g',label="weff")
 #plt.xticks(ticks,labels);
 #plt.yticks(ticks2,labels2)
 #plt.legend(prop={'size': 10})
-plt.title("Su Olson for t = " + str(t))
+plt.title("Su Olson for t = " + str(t1))
 #plt.ylabel('Radation tempreture Density - T(x,t)');
 #plt.xlabel('x');
 plt.show()

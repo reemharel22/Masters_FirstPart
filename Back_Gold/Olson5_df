@@ -16,3 +16,6 @@ Temp_0: 0.05623413252
 TH: 5
 dfrac: 0.2
 BC: 3
+sig_factor: 1
+diagnostics: 3 10 15 20
+timefinish: 25

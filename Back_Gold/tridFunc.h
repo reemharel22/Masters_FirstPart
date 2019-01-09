@@ -13,7 +13,7 @@ void buildDKershaw(int X,double (*EF)[X]);
 void buildDLarsen(int X,int N,double (*D)[X], double E[X][N],double F[X+1][N],double [X][N],int j);
 void buildDLP(int X,double (*EF)[X]);
 void buildDMinerbo(int X,double (*EF)[X]);
-void buildDDiff(int X,double (*EF)[X]);
+void buildDDiff(int X,double (*EF)[X], double opac[X]);
 void buildDDiffAsym(int X,double (*EF)[X]);
 void buildDDiscDiffAsym(int X,double (*EF)[X]);
 void setLambda(int X,int N,double E[][N],double T[][N],double (*D)[X],int j);
