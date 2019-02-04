@@ -29,47 +29,10 @@ def WaveFront(fname):
     n_str = data.split()
     List = []
     List.append([float(x) for x in n_str])
-
-  #  data = f.readline()
-  #  n_str = data.split()
-  #  a1 = []
-  #  a1.append([float(x) for x in n_str])
-    
-
-  #  data = f.readline()
-  #  n_str = data.split()
-  #  flux = []
-  #  flux.append([float(x) for x in n_str])
     
     return x1, t1, List#, a1 ,flux
 
 def extract_data(fname, t0):
-    # x = []
-    # y1 = []
-    # y2 = []
-    # dt = []
-    # i = 0
-    # f = open(fname,"r")
-    # data = f.readlines()
-    # x = convert_to_float(data[0].split())
-    # #dt = convert_to_float(data[1].split())
-    # y = convert_to_float(data[i].split())
-    # found = False
-    # while ( (i + 1) != len(dt) and not found):
-    #     if (dt[i] == t0):
-    #         y1 = convert_to_float(data[i + 2].split())
-    #         y2 = y1
-    #         t = dt[i]
-    #         found = True
-    #     if ( float(dt[i + 1]) > t0 and float(dt[i]) < t0):
-    #         y1 = convert_to_float(data[i + 2].split())
-    #         y2 = convert_to_float(data[i + 3].split())
-    #         t = dt [i]
-
-    #         found = True
-    #     i = i + 1
-    # print ("Found i: ", i + 1)
-    # return x, y1, y2, t
     x = []
     y_curr = []
     y_prev = []
@@ -85,9 +48,10 @@ def extract_data(fname, t0):
         y_curr = convert_to_float(data[i].split())
         y_prev = convert_to_float(data[i - 1].split())
         if ( float(y_curr[1]) >= t0 and float(y_prev[1]) <= t0):
+            print ("Found i:" ,i + 1,"ycurr:", y_curr[1], "yprev:", y_prev[1])
             found = True
         i = i + 1
-    #print ("Found i: ", i + 1)
+    print ("Found i: ", i + 1)
     return x, y_curr[2:], y_prev[2:], y_curr[1], y_prev[1]
 
 def convert_to_float(arr):

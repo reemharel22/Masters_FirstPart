@@ -51,13 +51,13 @@ def create_file(T,TH) :
         
 
 HEV = 1160500
-beta          = 3
-alpha         = 0
-lambda_       = 0
+beta          = 1.1
+alpha         = 3.53
+lambda_       = 0.75
 f             = 8.8e13 / ((HEV**beta))
 g             = 1.0 / (9175.0 * (HEV**alpha))
 rho = 50e-3
-mu = 0
+mu = 0.09
 
 four_alpha = 4.0 + alpha
 iterations = 190
@@ -90,7 +90,7 @@ for i in range(1, iterations):
 
 THY = np.ndarray([200], np.float64)
 x = np.ndarray([200], np.float64)
-plt.subplot(211)
+#plt.subplot(211)
 line4 = plt.plot(T[0:iterations - 1]/1e-9, 10 * x_f[0:iterations - 1],'k',label="P1AB")
 #from 0 to 0.2cm .... -> let's go for 200 points i.e 0.001cm
 

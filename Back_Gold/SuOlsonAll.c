@@ -10,13 +10,13 @@
 #include "nrutil.c"
 #include "tridag.c"
 #include "tridFunc.h"
-#define N 2000 // isn't relevant anymore
-#define X 2000 // space
+#define N 1500 // isn't relevant anymore
+#define X 1500 // space
 //#define NN (((X*2) + 1))
 //#define NN 3001
 //#define N 10
 //#define X 10
-#define NN 2000
+#define NN 1500
 //#define NN X
 //#define NN 10
 double epsilon = 1e-20;
@@ -89,8 +89,8 @@ double Cv = 0;
 double d_frac = 0.1;
 double P1 = 0;
 //-silicon is 3.53
-double alpha = 3.5;
-double beta = 1.1;
+double alpha;
+double beta ;
 //double alpha = 3.0;
 //double beta = 1.0;
 double mu_sio = 0.1;
@@ -204,9 +204,9 @@ int main(int argc,char *argv[]) {
    //     for ( j = 0; j < X; j++) {
    //         if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000) {
     //            if (j == 1 || j == 10 || j == 17 || j == 31 || j == 45 || j == 50 || j == 56 || j == 75 || j == 100 || j == 133 || j == 177)
-   //                // printf("%f\t", getT(j, i));
-          //  printf("%f\t", E[j][i]);
-           //           printf("%f\t",pow(E[j][i],0.5));
+   //                // printf("%10e\t", getT(j, i));
+          //  printf("%10e\t", E[j][i]);
+           //           printf("%10e\t",pow(E[j][i],0.5));
     //        }
     //    }
     //        if (i == 10 || i == 31 || i == 100 || i == 316 || i == 1000 || i == 3162  || i == 10000)
@@ -246,17 +246,17 @@ void sendToFileE(int p) {
         kk = 1E9;
     }
     fprintf(fp, "%d ", currentTimeStep - 1 );
-    fprintf(fp, "%f ", (prev_time) * kk );
+    fprintf(fp, "%10e ", (prev_time) * kk );
     for ( i = 0; i < X; i++) {
             //fprintf(fp,"%f ",  E[i][j]);
-            fprintf(fp,"%f ",  pow(E_old[i] / arad, 0.25));
+            fprintf(fp,"%10e ",  pow(E_old[i] / arad, 0.25));
     }
     fprintf(fp,"\n");
     fprintf(fp, "%d ", currentTimeStep );
-    fprintf(fp, "%f ", (currentTime) * kk );
+    fprintf(fp, "%10e ", (currentTime) * kk );
     for ( i = 0; i < X; i++) {
-            //fprintf(fp,"%f ",  E[i][j]);
-            fprintf(fp,"%f ",  pow(E_current[i] / arad, 0.25));
+            //fprintf(fp,"%10e ",  E[i][j]);
+            fprintf(fp,"%10e ",  pow(E_current[i] / arad, 0.25));
     }
     fprintf(fp,"\n");
     printf("Diagnostic: Time: %10e\t Step: %d, %d\n", currentTime * kk, currentTimeStep);
@@ -282,13 +282,13 @@ void sendToFileT(int p) {
     fprintf(fp, "%10e ",(prev_time) * kk );
     if (problem != 2){
         for ( i = 0; i < X; i++) {
-       //     printf("%f\t", getT(i, 0));
+       //     printf("%10e\t", getT(i, 0));
             fprintf(fp,"%10e ",(getT(i, 0)));
         }
     } else {
         for ( i = 0; i < X; i++) {
-     //       printf("%f\t", getT(i, 0)/11605.0);
-                fprintf(fp,"%f ",(getT(i, 0)/11605.0));
+     //       printf("%10e\t", getT(i, 0)/11605.0);
+                fprintf(fp,"%10e ",(getT(i, 0)/11605.0));
         }
     }
    // printf("\n");
@@ -301,7 +301,7 @@ void sendToFileT(int p) {
         }
     } else {
         for ( i = 0; i < X; i++) {
-                fprintf(fp,"%f ",(getT(i, 1)/11605.0));
+                fprintf(fp,"%10e ",(getT(i, 1)/11605.0));
         }
     }
 
@@ -334,7 +334,7 @@ void sendToFileW(int p) {
    // }
     //  fprintf(fp,"\n");
     //for ( j = 0; j < X; j++) {
-     //   fprintf(fp,"%f ", F[0][j]/2.0);
+     //   fprintf(fp,"%10e ", F[0][j]/2.0);
     
    // }
      // fprintf(fp,"\n");
@@ -491,12 +491,13 @@ void constructLUDDiffMUB() {
 void CalculateT() {
     int i;
     int stop = 3;
+    double coeff;
     for ( i = 0; i < X; i++) {
         double t = getT(i, 0);
         double cap = getCv(i, 0);
        // double coeff = (sig_factor * getOpacity(i, 0) * 4.0  * pow(t, 3) * arad)
        // / (cap);
-       double coeff = (sig_factor * opac[i] * 4.0  * pow(t, 3) * arad)
+       coeff = (sig_factor * opac[i] * 4.0  * pow(t, 3) * arad)
         / (cap);
         //coeff = deltaT*c*coeff;
 
@@ -544,18 +545,14 @@ double getdt() {
 }
 
 double getOpacity(int space, int time1) {
-
     double t_galpha = (pow(rho, s_lambda + 1.0) 
                         / (s_g * pow(getT(space, time1), alpha)));
-                        //printf("%10e\n",t_galpha);
-    //double bbbb = rho / t_galpha; 
-   // double t = getT(space, time1);
-    //double a = 1.0/(pow(t, 3.0));
-    //if (t_galpha != a) {
-        // printf("bad opacity\n");
-        //exit(1);
-    //}
     return t_galpha;
+}
+
+double getCv(int space, int time1) {
+    double abb = beta * s_f * pow(getT(space, time1), beta - 1.0) * pow(rho,-mu_sio + 1.0);
+    return abb;
 }
 
 int setUpProgram(int argc,char *argv[]) {
@@ -777,15 +774,6 @@ void setUpInitialCondition() {
 
 }
 
-double getCv(int space, int time1) {
-    
-    double abb = beta * s_f * pow(getT(space, time1), beta - 1.0)
-        * pow(rho,-mu_sio);
-     ///   printf("%10e\n",abb);
-        //if (abb != 4.0*arad)
-          //  printf("bad cv\t%10e\t%10e\n",s_f, 4.0*arad);
-        return abb;
-}
 
 double getT(int space,int time1) {
     if (time1 == 0) { // we will return the old temp
@@ -893,7 +881,7 @@ void findWavefront(int time1) {
     if (time1 < 200){
     //    printf("%lf\t%15.15lf\n",position*10,maxT);
     }
-    waveFront[time1] = position*10;    
+    printf("%10e\n", position*10);
 }
 
 void calculateFlux(int time1){
@@ -960,7 +948,7 @@ void update_dt() {
     }
    // max_T *= 10;
     //max_T = 100 * 11605;
-    min_T = max_T * 10E-3;
+    min_T = max_T * 1E-3;
 
     for(i = 1; i < X; i++) {
         T1 = getT(i, 0 );
@@ -1025,28 +1013,38 @@ void diagnostics() {
         if (prev_time * kk <= 3.16 && currentTime * kk >= 3.16) {
             sendToFileE(1);
             sendToFileT(1);
+            findWavefront(1);
         } else if (prev_time * kk <= 10 && currentTime * kk >= 10) {
             sendToFileE(1);
             sendToFileT(1);
+            findWavefront(1);
         }
     } else if(problem == 1) { // olson 
         if (prev_time * kk <= 3 && currentTime * kk >= 3) {
             sendToFileE(1);
             sendToFileT(1);
+            findWavefront(1);
         } else if (prev_time * kk <= 10 && currentTime * kk >= 10) {
             sendToFileE(1);
             sendToFileT(1);
+            findWavefront(1);
         }
     } else if( problem == 2) {
         if (prev_time * kk <= 1 && currentTime * kk >= 1) {
             sendToFileE(1);
             sendToFileT(1);
+            findWavefront(1);
         } 
     }
     for ( i = 0; i < num_diagnostics; i ++) {
         if (prev_time * kk <= diag[i] && currentTime * kk >= diag[i]) {
             sendToFileE(1);
             sendToFileT(1);
+            findWavefront(1);
+        } else if (diag[i] == 9999 && currentTimeStep % 10 == 0) {
+            sendToFileE(1);
+            sendToFileT(1);
+            findWavefront(1);
         }
     }
 }

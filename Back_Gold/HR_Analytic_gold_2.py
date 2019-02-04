@@ -51,16 +51,18 @@ def create_file(T,TH) :
         
 
 HEV = 1160500
-beta          = 1.6
-alpha         = 1.5
-lambda_       = 0.2
-f             = 3.4E13 / ((HEV**beta))
+beta          = 1
+alpha         = 2
+lambda_       = 0.75
+f             = 8.8E13
+f = f / ((HEV**beta))
 
 #g             = 1.0 / (9175.0 * (HEV**alpha))
-g = 1.3889E-4
+#g = 1.3889E-4
+g = 0.00011
 g = g / (HEV**alpha)
-rho = 19.32
-mu = 0.14
+rho = 50E-3
+mu = 0.09
 
 four_alpha = 4.0 + alpha
 iterations = 190
