@@ -120,6 +120,8 @@ double th;
 int constOpacity = 0;
 
 int main(int argc,char *argv[]) {
+     printf("Starting\n");
+    exit(1);
   double a,b,d;
   FILE*fp;
   int k,p,h,i=0,j=0;
@@ -185,6 +187,7 @@ int main(int argc,char *argv[]) {
     if (problem == 2) {
         kk = 1E9;
     }
+   
   //setting up the matrices
     while (currentTime * kk < time_finish) {
         if (currentTimeStep % 1000 == 0) {
@@ -545,14 +548,16 @@ double getdt() {
 }
 
 double getOpacity(int space, int time1) {
-    double t_galpha = (pow(rho, s_lambda + 1.0) 
+    double t_galpha = (pow(rho, s_lambda + 1) 
                         / (s_g * pow(getT(space, time1), alpha)));
+
+    
     return t_galpha;
 }
 
 double getCv(int space, int time1) {
-    double abb = beta * s_f * pow(getT(space, time1), beta - 1.0) * pow(rho,-mu_sio + 1.0);
-    return abb;
+    double abbcdef = beta * s_f * pow(getT(space, time1), beta - 1 ) * pow(rho, -mu_sio + 1.0);
+    return abbcdef;
 }
 
 int setUpProgram(int argc,char *argv[]) {
@@ -774,7 +779,7 @@ void setUpInitialCondition() {
 
 }
 
-
+// GETS THE REAL TEMPERATURE, Time1 = 0 we return previous temprature, time1 = 1 we reutrn the current one
 double getT(int space,int time1) {
     if (time1 == 0) { // we will return the old temp
         return pow(V_old[space] / arad,0.25);
