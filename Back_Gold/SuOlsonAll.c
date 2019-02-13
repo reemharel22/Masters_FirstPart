@@ -120,8 +120,6 @@ double th;
 int constOpacity = 0;
 
 int main(int argc,char *argv[]) {
-     printf("Starting\n");
-    exit(1);
   double a,b,d;
   FILE*fp;
   int k,p,h,i=0,j=0;
@@ -548,7 +546,7 @@ double getdt() {
 }
 
 double getOpacity(int space, int time1) {
-    double t_galpha = (pow(rho, s_lambda + 1) 
+    double t_galpha = (pow(rho, s_lambda + 1.0) 
                         / (s_g * pow(getT(space, time1), alpha)));
 
     
@@ -556,7 +554,8 @@ double getOpacity(int space, int time1) {
 }
 
 double getCv(int space, int time1) {
-    double abbcdef = beta * s_f * pow(getT(space, time1), beta - 1 ) * pow(rho, -mu_sio + 1.0);
+    double abbcdef = beta * s_f * pow(getT(space, time1), beta - 1.0 ) 
+    * pow(rho, -mu_sio + 1.0);
     return abbcdef;
 }
 
@@ -703,17 +702,7 @@ double getSource(int space,int time1) {
 void setUpInitialCondition() {
     double Src;
     int i,j;
-    //arad = 4.0 * sigma_boltzman / c;
-    //deltaT = deltaT / c;
-    //deltaT = deltaT / c;
-    //s_f = s_f / (pow(1160452.0, beta));
-    //s_g = s_g / pow(1160452.0, alpha);
-    //s_f = 4.0 * arad;
-    //s_g = 1.0;
-    //rho = 1.0;
-    //beta = 1.0;
-    //alpha = 3.0;
-   // alpha = 4.0 * arad;
+
     for ( j = 0; j < N; j++) {
         E_old[j] = V_old[j] = pow(initV, 4) * arad;
     }
@@ -734,8 +723,8 @@ void setUpInitialCondition() {
     FILE *fp1;
     char buff[255];
 
-    fp1 = fopen("dataset3.csv","r");
-    for ( i = 0; i < 190; i++) {
+    fp1 = fopen("dataset1.csv","r");
+    for ( i = 0; i < 1518/2; i++) {
         fscanf(fp1,"%s",buff);
         TH[0][i] = atof(buff);
         fscanf(fp1,"%s",buff);
@@ -794,16 +783,19 @@ double getT2(int space,int time1) {
 }
 
 double getTH(int time1){
-    return th;
     int i,j;
-    return 190.0 * 11604.52;
-    double t = time1*deltaT*1E9;
-    for (i = 1; i < 190; i++){
+    double ttt = currentTime*1E9;
+    if (ttt < TH[0][0]) {
+        return TH[0][1] * 11604.52;
+    }
+    for (i = 1; i < 1518/2; i++){
         //printf("%10e\t%10e\n",t,TH[0][i]);
-        if (TH[0][i - 1] < t && t <  TH[0][i]){
+        if (TH[0][i - 1] < ttt && ttt <  TH[0][i]) {
             return 11604.52* TH[1][i];
         }
     }
+    printf("Not found %10e \n", TH[0][i - 1]);
+    exit(1);
 }
 
 double getFinc(){
@@ -812,8 +804,6 @@ double getFinc(){
 
 void applyBC(int time1) {
   if (constOpacity == 0) {
-    //double mu = calculateMu2(calculateWeff(0,currentTimeStep ));
-    //solve[0] += getFinc() * deltaT * 2.0/(c * deltaX);
    double l = deltaT / (deltaX*deltaX);
     solve[0] += l*c*arad*deltaX/2.0;
     //solve[0] += (2.0*getFinc() - c*solve[0]*mu)*(deltaT/deltaX);
@@ -886,7 +876,7 @@ void findWavefront(int time1) {
     if (time1 < 200){
     //    printf("%lf\t%15.15lf\n",position*10,maxT);
     }
-    printf("%10e\n", position*10);
+    //printf("%10e\n", position*10);
 }
 
 void calculateFlux(int time1){
@@ -966,9 +956,9 @@ void update_dt() {
 
     dt_tag = d_frac * (deltaT) / tmp;
     deltaT = Min(dt_tag, 1.1*deltaT);
-   // if (deltaT > 1E-11) {
-    //    deltaT = 1E-11;
-    //}
+    if (deltaT > 1E-11) {
+        deltaT = 1E-11;
+    }
  //   printf("dt tag: %10e\tdt: %10e\tt: %10e\tdelta Temp: %10e\n",dt_tag,deltaT, currentTime, tmp);
     if (currentTimeStep == 300) {
        // exit(1);

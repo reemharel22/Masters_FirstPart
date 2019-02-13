@@ -11,7 +11,7 @@ import data_handle as dh
 #### THE ONLY TIMES THAT ARE THERE ARE t = 3.16 t = 10 !!! ANY MORE THAN THAT YOU WILL
 #### NEED TO ADD TO THE FILES : SuOlsonDiffusionData & SuOlsonTransportData
 TT = 4;
-t0 = 10
+t0 = 3
 #start of the main
 N = 5001
 suOlsonDiffNumerit = []
